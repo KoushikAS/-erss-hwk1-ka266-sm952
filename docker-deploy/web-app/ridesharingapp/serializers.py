@@ -4,5 +4,5 @@ from .models import *
 
 class RidesSerializers(serializers.ModelSerializer):
     class Meta:
-        model = Rides
-        fields = ('RideId', 'Source', 'Destination')
+        model = Ride
+        fields = ('rideId', 'source', 'destination', 'status')

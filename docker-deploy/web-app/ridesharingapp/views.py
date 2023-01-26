@@ -1,7 +1,7 @@
 from django.http.response import JsonResponse, HttpResponse
 
 from .serializers import RidesSerializers
-from .models import Rides
+from .models import Ride
 
 
 # Create your views here.
@@ -29,6 +29,6 @@ def say_hello(request):
 
 def get_rides(request):
     # Should Do User Validation
-    rides = Rides.objects.all()
+    rides = Ride.objects.all()
     rides_serialized = RidesSerializers(rides, many=True)
     return JsonResponse(rides_serialized.data, safe=False)
