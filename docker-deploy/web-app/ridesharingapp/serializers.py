@@ -5,7 +5,7 @@ from .models import *
 class UserSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('userId', 'name', 'emailId')
+        fields = '__all__'
 
 
 class DriverSerializers(serializers.ModelSerializer):
@@ -17,4 +17,4 @@ class DriverSerializers(serializers.ModelSerializer):
 class RideSerializers(serializers.ModelSerializer):
     class Meta:
         model = Ride
-        fields = ('rideId', 'owner', 'driver', 'rideShared', 'source', 'destination', 'status')
+        fields = '__all__'
