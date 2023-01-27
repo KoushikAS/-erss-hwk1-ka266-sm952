@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [ 'localhost', '127.0.0.1', 'web']
 # Application definition
 
 INSTALLED_APPS = [
+    'ridesharingapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'ridesharingapp.apps.RidesharingappConfig'
+   # 'ridesharingapp.apps.RidesharingappConfig',
+
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True

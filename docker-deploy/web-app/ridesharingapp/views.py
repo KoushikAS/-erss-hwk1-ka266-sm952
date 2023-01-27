@@ -1,7 +1,9 @@
 from django.http.response import JsonResponse, HttpResponse
 
+from django.shortcuts import render, redirect
 from .serializers import *
 from .models import *
+from .forms import *
 
 
 # Create your views here.
@@ -48,3 +50,17 @@ def get_users(request):
     users = User.objects.all()
     users_serialized = UserSerializers(users, many=True)
     return JsonResponse(users_serialized.data, safe=False)
+
+
+def get_homepage(request):
+    return render(request, 'home/homepage.html')
+
+
+def create_user(request):
+    if request.POST:
+        form = UserForm(request.POST)
+        print(form)
+        if form.is_valid():
+            form.save()
+            return redirect('/')
+    return render(request, 'registeruserpage.html', {'form': UserForm})
