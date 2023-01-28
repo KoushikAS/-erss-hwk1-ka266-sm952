@@ -17,4 +17,6 @@ urlpatterns =[
     path('rides/edit', views.create_ride, name = 'editride'),
     path('rides/open/driver', views.create_ride, name = 'openridesdriver'),
     path('rides/open/sharer', views.create_ride, name = 'openridessharer'),
+    path('driver/ride/confirmed', views.ride_confirmed, name='confirmride'),
+    path('driver/ride/complete/', views.ride_complete, name='completeride'),
 ]

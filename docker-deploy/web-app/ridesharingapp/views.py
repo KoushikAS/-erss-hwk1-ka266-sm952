@@ -45,7 +45,7 @@ def create_user(request):
         print(form)
         if form.is_valid():
             form.save()
-            return redirect('/')
+            return redirect('/login/user/')
     return render(request, 'register-user-page.html', {'form': UserForm})
 
 
@@ -88,4 +88,12 @@ def ride_searching_driver(request):
 
 # Ride Searching Sharer: Similar to Ride Selection but with filters and open rides driver
 def ride_searching_sharer(request):
+    return HttpResponse("Page Under Development")
+
+# Ride Complete: when driver completes the ride
+def ride_complete(request):
+    return HttpResponse("Page Under Development")
+
+# Ride Cnfirmed: when driver confirms the ride
+def ride_confirmed(request):
     return HttpResponse("Page Under Development")

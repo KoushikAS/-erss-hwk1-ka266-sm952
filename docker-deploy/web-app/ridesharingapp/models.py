@@ -27,7 +27,7 @@ class Driver(User):
 
 class Party(models.Model):
     owner = models.ForeignKey(User, related_name='party_owner', on_delete=models.CASCADE)
-    passengers = models.IntegerField()
+    passengers = models.IntegerField(default= 1)
 
 
 class Ride(models.Model):
@@ -37,8 +37,8 @@ class Ride(models.Model):
         COMPLETED = 'COMPLETED', _('Completed')
 
     rideId = models.AutoField(primary_key=True)
-    driver = models.ForeignKey(Driver, related_name='driver', on_delete=models.CASCADE, blank = False, null = False)
-    rideOwner = models.ForeignKey(Party, related_name='ride_owner', on_delete=models.CASCADE, blank = False, null= True)
+    driver = models.ForeignKey(Driver, related_name='driver', on_delete=models.CASCADE, blank = True, null = True)
+    rideOwner = models.ForeignKey(Party, related_name='ride_owner', on_delete=models.CASCADE, blank = False, null= False)
     isSharable = models.BooleanField(default=False)
     rideShared = models.ManyToManyField(Party, blank=True)
     source = models.CharField(max_length=500)

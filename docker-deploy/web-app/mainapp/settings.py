@@ -31,7 +31,9 @@ ALLOWED_HOSTS = [ 'localhost', '127.0.0.1', 'web']
 # Application definition
 
 INSTALLED_APPS = [
-    'ridesharingapp',
+    'ridesharingapp.apps.RidesharingappConfig',
+   # 'crispy_forms'
+   # 'ridesharingapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-   # 'ridesharingapp.apps.RidesharingappConfig',
+
 
 ]
 
