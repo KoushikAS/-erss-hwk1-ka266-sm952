@@ -1,27 +1,99 @@
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import  JSONParser
-from django.http.response import JsonResponse
+from django.http.response import JsonResponse, HttpResponse
 
-from models import *
-from serializers import *
-
-# Create your views here.
+from django.shortcuts import render, redirect
+from .serializers import *
+from .models import *
+from .forms import *
 
 
-@csrf_exempt
-def RidesApi(request, id=0):
-    if request.method == 'GET':
-        rides = Rides.objects.all()
-        rides_serialized = RidesSerializers(rides, many = True)
-        return JsonResponse(rides_serialized.data,safe=False)
-    elif request.method == 'POST':
-        ride_data = JSONParser().parse(request)
-        ride_serializer = RidesSerializers(ride_data)
-        if ride_serializer.is_valid():
-            ride_serializer.save()
-            return JsonResponse("Successful", safe = False)
-        else:
-            return JsonResponse("Failed", safe = False)
+# Just for testing purpose
+def say_hello(request):
+    return HttpResponse("Hello World")
+
+#Just for testing purpose
+def get_rides(request):
+    # Should Do User Validation
+    rides = Ride.objects.all()
+    rides_serialized = RideSerializers(rides, many=True)
+    return JsonResponse(rides_serialized.data, safe=False)
 
 
+# Just for Testing purpose
+def get_drivers(request):
+    # Should Do User Validation
+    drivers = Driver.objects.all()
+    drivers_serialized = DriverSerializers(drivers, many=True)
+    return JsonResponse(drivers_serialized.data, safe=False)
+
+
+# Just for Testing purpose
+def get_users(request):
+    # Should Do User Validation
+    users = User.objects.all()
+    users_serialized = UserSerializers(users, many=True)
+    return JsonResponse(users_serialized.data, safe=False)
+
+
+def get_homepage(request):
+    return render(request, 'homepage.html')
+
+
+# register user
+def create_user(request):
+    if request.POST:
+        form = UserForm(request.POST)
+        print(form)
+        if form.is_valid():
+            form.save()
+            return redirect('/login/user/')
+    return render(request, 'register-user-page.html', {'form': UserForm})
+
+
+def login_user(request):
+    return HttpResponse("Page Under Development")
+
+
+def logout_user(request):
+    return HttpResponse("Page Under Development")
+
+
+def driver_registration(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Selection: View Rides accessible to the user
+def view_rides(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Requesting
+def create_ride(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Requesting Editing
+def edit_ride(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Status Viewing: View Individual Ride
+def view_ride(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
+def ride_searching_driver(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Searching Sharer: Similar to Ride Selection but with filters and open rides driver
+def ride_searching_sharer(request):
+    return HttpResponse("Page Under Development")
+
+# Ride Complete: when driver completes the ride
+def ride_complete(request):
+    return HttpResponse("Page Under Development")
+
+# Ride Cnfirmed: when driver confirms the ride
+def ride_confirmed(request):
+    return HttpResponse("Page Under Development")

@@ -31,6 +31,9 @@ ALLOWED_HOSTS = [ 'localhost', '127.0.0.1', 'web']
 # Application definition
 
 INSTALLED_APPS = [
+    'ridesharingapp.apps.RidesharingappConfig',
+   # 'crispy_forms'
+   # 'ridesharingapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'ridesharingapp.apps.RidesharingappConfig'
+
+
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -75,6 +79,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mainapp.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000'
+]
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
