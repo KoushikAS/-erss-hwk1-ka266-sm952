@@ -37,8 +37,8 @@ class Ride(models.Model):
         COMPLETED = 'COMPLETED', _('Completed')
 
     rideId = models.AutoField(primary_key=True)
-    driver = models.ForeignKey(Driver, related_name='driver', on_delete=models.CASCADE)
-    rideOwner = models.ForeignKey(Party, related_name='ride_owner', on_delete=models.CASCADE)
+    driver = models.ForeignKey(Driver, related_name='driver', on_delete=models.CASCADE, blank = False, null = False)
+    rideOwner = models.ForeignKey(Party, related_name='ride_owner', on_delete=models.CASCADE, blank = False, null= True)
     isSharable = models.BooleanField(default=False)
     rideShared = models.ManyToManyField(Party, blank=True)
     source = models.CharField(max_length=500)

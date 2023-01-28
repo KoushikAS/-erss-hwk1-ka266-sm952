@@ -6,29 +6,11 @@ from .models import *
 from .forms import *
 
 
-# Create your views here.
-
-
-# @csrf_exempt
-# def RidesApi(request, id=0):
-#     if request.method == 'GET':
-#         rides = Rides.objects.all()
-#         rides_serialized = RidesSerializers(rides, many = True)
-#         return JsonResponse(rides_serialized.data,safe=False)
-#     elif request.method == 'POST':
-#         ride_data = JSONParser().parse(request)
-#         ride_serializer = RidesSerializers(ride_data)
-#         if ride_serializer.is_valid():
-#             ride_serializer.save()
-#             return JsonResponse("Successful", safe = False)
-#         else:
-#             return JsonResponse("Failed", safe = False)
-
 # Just for testing purpose
 def say_hello(request):
     return HttpResponse("Hello World")
 
-
+#Just for testing purpose
 def get_rides(request):
     # Should Do User Validation
     rides = Ride.objects.all()
@@ -53,9 +35,10 @@ def get_users(request):
 
 
 def get_homepage(request):
-    return render(request, 'home/homepage.html')
+    return render(request, 'homepage.html')
 
 
+# register user
 def create_user(request):
     if request.POST:
         form = UserForm(request.POST)
@@ -63,4 +46,46 @@ def create_user(request):
         if form.is_valid():
             form.save()
             return redirect('/')
-    return render(request, 'registeruserpage.html', {'form': UserForm})
+    return render(request, 'register-user-page.html', {'form': UserForm})
+
+
+def login_user(request):
+    return HttpResponse("Page Under Development")
+
+
+def logout_user(request):
+    return HttpResponse("Page Under Development")
+
+
+def driver_registration(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Selection: View Rides accessible to the user
+def view_rides(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Requesting
+def create_ride(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Requesting Editing
+def edit_ride(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Status Viewing: View Individual Ride
+def view_ride(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
+def ride_searching_driver(request):
+    return HttpResponse("Page Under Development")
+
+
+# Ride Searching Sharer: Similar to Ride Selection but with filters and open rides driver
+def ride_searching_sharer(request):
+    return HttpResponse("Page Under Development")

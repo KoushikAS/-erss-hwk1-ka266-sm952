@@ -2,4 +2,4 @@ Authentication of User. What if Hacker gets to know user Id, Ride Id
 What happens if 2 drivers accept the Ride at the same time
 What happens if driver gets deleted after accepting ride. According to the model Ride also gets delted. So no graceful of indicating to Owner and other user
 Should Clean up Rides after the time has expired
-Should understand CSRf and properly operate on it 
+Should understand CSRf and properly operate on it
