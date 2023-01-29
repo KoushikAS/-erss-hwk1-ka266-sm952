@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-Hello World
-</body>
-</html>
+{% for message in messages %}
+    <div class="alert alert-success">
+           {{ message }}
+    </div>
+{% endfor %}
+
+<div class="hello world">
+    Hello World
+    {{ request.session.userId }}
+    {{ request.session.driverView }}
+</div>

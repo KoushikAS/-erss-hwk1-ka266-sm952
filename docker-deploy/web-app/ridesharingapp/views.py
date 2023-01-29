@@ -4,13 +4,15 @@ from django.shortcuts import render, redirect
 from .serializers import *
 from .models import *
 from .forms import *
+from django.contrib import messages
 
 
 # Just for testing purpose
 def say_hello(request):
     return HttpResponse("Hello World")
 
-#Just for testing purpose
+
+# Just for testing purpose
 def get_rides(request):
     # Should Do User Validation
     rides = Ride.objects.all()
@@ -41,23 +43,57 @@ def get_homepage(request):
 # register user
 def create_user(request):
     if request.POST:
-        form = UserForm(request.POST)
-        print(form)
+        form = RegisterUserForm(request.POST)
         if form.is_valid():
             form.save()
+            storage = messages.get_messages(request)
             return redirect('/login/user/')
-    return render(request, 'register-user-page.html', {'form': UserForm})
+        else:
+            messages.error(request, 'User with this EmailId already exists.')
+            return redirect('registeruser')
+
+    return render(request, 'register-user-page.html', {'form': RegisterUserForm})
 
 
 def login_user(request):
-    return HttpResponse("Page Under Development")
+    if request.POST:
+        form = LoginUserForm(request.POST)
+        email_id = request.POST['emailId']
+
+        if User.objects.filter(emailId=email_id).exists():
+            request.session['userId'] = User.objects.get(emailId=email_id).userId
+            if Driver.objects.filter(emailId=email_id).exists():
+                request.session['driverView'] = True
+            else:
+                request.session['driverView'] = False
+
+            return redirect('home')
+        else:
+            messages.error(request, 'EmailId is not been registered in our system.')
+            return redirect('loginuser')
+
+    return render(request, 'login-user-page.html', {'form': LoginUserForm})
 
 
 def logout_user(request):
-    return HttpResponse("Page Under Development")
+    del request.session['userId']
+    del request.session['driverView']
+
+    return redirect('home')
 
 
 def driver_registration(request):
+    # if request.POST:
+    #     form = RegisterDriverForm(request.POST)
+    #     if form.is_valid():
+    #         form.save()
+    #         storage = messages.get_messages(request)
+    #         return redirect('/login/user/')
+    #     else:
+    #         messages.error(request, 'User with this EmailId already exists.')
+    #         return redirect('registerdriver')
+
+    # return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
     return HttpResponse("Page Under Development")
 
 
@@ -90,9 +126,11 @@ def ride_searching_driver(request):
 def ride_searching_sharer(request):
     return HttpResponse("Page Under Development")
 
+
 # Ride Complete: when driver completes the ride
 def ride_complete(request):
     return HttpResponse("Page Under Development")
+
 
 # Ride Cnfirmed: when driver confirms the ride
 def ride_confirmed(request):

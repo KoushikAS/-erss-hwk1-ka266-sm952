@@ -5,9 +5,9 @@
 {% endfor %}
 
 {% block content %}
-<h2>Register User</h2>
+<h2>Register Driver</h2>
 
-<form method="POST" action = "{% url 'registeruser' %}" enctype="multipart/form-data">
+<form method="POST" action = "{% url 'registerdriver' %}" enctype="multipart/form-data">
     {% csrf_token %}
     {{form}}
     <button>Submit</button>
