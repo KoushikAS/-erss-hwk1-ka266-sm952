@@ -83,18 +83,18 @@ def logout_user(request):
 
 
 def driver_registration(request):
-    # if request.POST:
-    #     form = RegisterDriverForm(request.POST)
-    #     if form.is_valid():
-    #         form.save()
-    #         storage = messages.get_messages(request)
-    #         return redirect('/login/user/')
-    #     else:
-    #         messages.error(request, 'User with this EmailId already exists.')
-    #         return redirect('registerdriver')
+    if request.POST:
+        form = RegisterDriverForm(request.POST)
+        if form.is_valid():
+            form.save()
+            storage = messages.get_messages(request)
+            return redirect('/login/user/')
+        else:
+            messages.error(request, 'User with this EmailId already exists.')
+            return redirect('registerdriver')
 
-    # return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
-    return HttpResponse("Page Under Development")
+    return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
+    #return HttpResponse("Page Under Development")
 
 
 # Ride Selection: View Rides accessible to the user

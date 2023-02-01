@@ -1,10 +1,9 @@
 from django.forms import ModelForm
 from django import forms
-from .models import User, Vehicle
+from .models import User, Driver
 
 
 class RegisterUserForm(ModelForm):
-    name = forms.TextInput()
     emailId = forms.EmailField()
 
     class Meta:
@@ -19,16 +18,10 @@ class LoginUserForm(ModelForm):
         model = User
         fields = ['emailId']
 
-#
-# class RegisterDriverForm(ModelForm):
-#     name = forms.TextInput()
-#     emailId = forms.EmailField()
-#     vehicle.type = forms.ChoiceField(choices = Vehicle.VehicleType)
-#     max_passengers = forms.IntegerField()
-#     license_no = forms.TextInput()
-#
-#
-#     class Meta:
-#         model = Vehicle
-#         fields = ['name', 'emailId', 'vehicle.max_passengers', 'vehicle.type', 'vehicle.license_no']
-#
+
+class RegisterDriverForm(ModelForm):
+    emailId = forms.EmailField()
+
+    class Meta:
+        model = Driver
+        fields = ['name', 'emailId', 'vehicle_type', 'max_passengers', 'license_no']
