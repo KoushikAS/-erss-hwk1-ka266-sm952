@@ -6,7 +6,7 @@ from .models import *
 from .forms import *
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 
 # Just for testing purpose
@@ -87,8 +87,8 @@ def login_user(request):
 
 
 def logout_user(request):
-    del request.session['userId']
-    del request.session['driverView']
+    logout(request)
+    messages.info(request, f"You have successfully logged out.")
 
     return redirect('home')
 
