@@ -129,8 +129,16 @@ def driver_registration(request):
     return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
     # return HttpResponse("Page Under Development")
 
+# View user details
+def view_user(request):
+    return HttpResponse("Page Under Development")
+
 # Editing user details
 def edit_user(request):
+    return HttpResponse("Page Under Development")
+
+# View Driver details
+def view_driver(request):
     return HttpResponse("Page Under Development")
 
 # Editing Driver details
