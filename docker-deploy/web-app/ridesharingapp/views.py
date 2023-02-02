@@ -37,6 +37,17 @@ def get_drivers(request):
 #     users_serialized = UserSerializers(users, many=True)
 #     return JsonResponse(users_serialized.data, safe=False)
 
+def check_user_authentication(request):
+    if request.user.is_authenticated is False:
+        messages.info(request, f"Please login again.")
+        return redirect('loginuser')
+
+
+def check_driver_view(request):
+    if request.session.get('driverView') is None:
+        messages.info(request, f"Please register as a Driver.")
+        return redirect('registerdriver')
+
 
 def get_homepage(request):
     return render(request, 'homepage.html')
@@ -61,7 +72,7 @@ def create_user(request):
 
 def login_user(request):
     if request.POST:
-        form = AuthenticationForm(data = request.POST)
+        form = AuthenticationForm(data=request.POST)
 
         if form.is_valid():
             username = form.cleaned_data.get('username')
@@ -69,9 +80,7 @@ def login_user(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                print(user.id)
-                print(user.username)
-                if Driver.objects.filter(username =username).exists():
+                if Driver.objects.filter(user=user).exists():
                     request.session['driverView'] = True
                 else:
                     request.session['driverView'] = False
@@ -94,12 +103,24 @@ def logout_user(request):
 
 
 def driver_registration(request):
+    check_user_authentication(request)
+
+    if Driver.objects.filter(user=request.user).exists():
+        messages.info(request, f"You have already registered as a Driver.")
+        return redirect('home')
+
     if request.POST:
         form = RegisterDriverForm(request.POST)
         if form.is_valid():
-            form.save()
-            storage = messages.get_messages(request)
-            return redirect('/login/user/')
+            """ Registering the new driver with current logged in user details"""
+            new_driver = form.save(commit=False)
+            new_driver.user = request.user
+            new_driver.save()
+            form.save_m2m()
+
+            request.session['driverView'] = False
+            messages.info(request, f"Successfully registered as a Driver.")
+            return redirect('home')
         else:
             messages.error(request, 'User with this EmailId already exists.')
             return redirect('registerdriver')

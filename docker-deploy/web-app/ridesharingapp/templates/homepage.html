@@ -28,6 +28,12 @@
         <div class="alert alert-success" role="alert">
             <h3>Welcome {{ user.username }}!</h3>
             <a href="{% url 'logoutuser' %}">Logout?</a>
+            {% if request.session.driverView %}
+            UnRegister as Driver
+            {% else %}
+            <a href="{% url 'registerdriver'%}"> Register as Driver</a>
+            {% endif %}
+
         </div>
     {% else %}
         <div class="alert alert-success" role="alert">
