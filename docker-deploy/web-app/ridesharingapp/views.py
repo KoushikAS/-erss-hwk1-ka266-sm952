@@ -58,7 +58,7 @@ def get_homepage(request):
 def create_user(request):
     if request.POST:
         form = RegisterUserForm(request.POST)
-        print(form.is_valid())
+
         if form.is_valid():
             form.save()
             messages.success(request, f'Your account has been created. You can log in now!')
@@ -68,7 +68,7 @@ def create_user(request):
     else:
         form = RegisterUserForm(request.POST)
 
-    return render(request, 'register-user-page.html', {'form': form})
+    return render(request, 'register-user-page.html', {'form': form, 'pageAction': 'Register User'})
 
 
 def login_user(request):
@@ -129,21 +129,40 @@ def driver_registration(request):
     return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
     # return HttpResponse("Page Under Development")
 
+
+# Edit user details
+def edit_user(request):
+    check_user_authentication(request)
+    if request.POST:
+        form = RegisterUserForm(request.POST, instance=request.user)
+
+        if form.is_valid():
+            form.save()
+            logout(request)
+            messages.success(request, f'Your account has been Edited. Please login again')
+            return redirect('loginuser')
+        else:
+            messages.error(request, f'Could not Edit the account')
+    else:
+        form = RegisterUserForm(instance=request.user)
+
+    return render(request, 'user-form.html', {'form': form, 'pageAction': 'Edit User'})
+
+
 # View user details
 def view_user(request):
     return HttpResponse("Page Under Development")
 
-# Editing user details
-def edit_user(request):
-    return HttpResponse("Page Under Development")
 
 # View Driver details
 def view_driver(request):
     return HttpResponse("Page Under Development")
 
+
 # Editing Driver details
 def edit_driver(request):
     return HttpResponse("Page Under Development")
+
 
 # Delete Driver details
 def delete_driver(request):
@@ -153,6 +172,7 @@ def delete_driver(request):
     request.session['driverView'] = False
     messages.info(request, f"Successfully un-registered as a Driver.")
     return redirect('home')
+
 
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):

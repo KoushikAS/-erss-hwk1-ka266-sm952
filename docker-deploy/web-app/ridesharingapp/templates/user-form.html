@@ -12,13 +12,13 @@
 {% endfor %}
 
 {% block content %}
-<h3>Register here</h3>
+<h3>{{ pageAction }}</h3>
 <hr>
 
 <form action="" method="POST">
     {% csrf_token %}
     {{ form.as_p }}
 
-    <button type="submit">Register</button>
+    <button type="submit">{{ pageAction }}</button>
 </form>
 {% endblock %}

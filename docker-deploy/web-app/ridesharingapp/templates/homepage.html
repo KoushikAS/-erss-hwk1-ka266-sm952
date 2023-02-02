@@ -28,6 +28,7 @@
         <div class="alert alert-success" role="alert">
             <h3>Welcome {{ user.username }}!</h3>
             <a href="{% url 'logoutuser' %}">Logout?</a>
+            <a href="{% url 'edituser' %}">Edit User Details</a>
             {% if request.session.driverView %}
             <a href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a>
             {% else %}
