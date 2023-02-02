@@ -30,12 +30,13 @@ def get_drivers(request):
     return JsonResponse(drivers_serialized.data, safe=False)
 
 
-# # Just for Testing purpose
-# def get_users(request):
-#     # Should Do User Validation
-#     users = User.objects.all()
-#     users_serialized = UserSerializers(users, many=True)
-#     return JsonResponse(users_serialized.data, safe=False)
+# Just for Testing purpose
+def get_users(request):
+    # Should Do User Validation
+    users = User.objects.all()
+    users_serialized = UserSerializers(users, many=True)
+    return JsonResponse(users_serialized.data, safe=False)
+
 
 def check_user_authentication(request):
     if request.user.is_authenticated is False:
@@ -61,7 +62,7 @@ def create_user(request):
         if form.is_valid():
             form.save()
             messages.success(request, f'Your account has been created. You can log in now!')
-            return redirect('/login/user/')
+            return redirect('loginuser')
         else:
             messages.error(request, f'Could not create an account')
     else:
@@ -128,6 +129,17 @@ def driver_registration(request):
     return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
     # return HttpResponse("Page Under Development")
 
+# Editing user details
+def edit_user(request):
+    return HttpResponse("Page Under Development")
+
+# Editing Driver details
+def edit_driver(request):
+    return HttpResponse("Page Under Development")
+
+# Delete Driver details
+def delete_driver(request):
+    return HttpResponse("Page Under Development")
 
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):

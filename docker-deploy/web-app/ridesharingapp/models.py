@@ -5,12 +5,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
-#
-# class User(models.Model):
-#     userId = models.AutoField(primary_key=True)
-#     name = models.CharField(max_length=500, blank=False, default=None)
-#     emailId = models.CharField(max_length=500, unique=True)
-
 
 class Driver(models.Model):
     class VehicleType(models.TextChoices):

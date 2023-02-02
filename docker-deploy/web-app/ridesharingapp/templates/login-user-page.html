@@ -1,9 +1,9 @@
 {% for message in messages %}
-    <div class="alert alert-success">
-        {{ message }}
-        {{ form.user_name.errors }}
-        {{ form.password.errors }}
-    </div>
+<div class="alert alert-success">
+    {{ message }}
+    {{ form.user_name.errors }}
+    {{ form.password.errors }}
+</div>
 {% endfor %}
 
 {% block content %}
@@ -12,7 +12,7 @@
 <form action="" method="POST">
     {% csrf_token %}
     {% for field in form %}
-        <p>{{ field.label }}: <br> {{ field }}</p>
+    <p>{{ field.label }}: <br> {{ field }}</p>
     {% endfor %}
     <button type="submit">Login</button>
 </form>

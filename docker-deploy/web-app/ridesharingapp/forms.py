@@ -15,7 +15,6 @@ class RegisterUserForm(UserCreationForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
 
-
 class LoginUserForm(ModelForm):
     emailId = forms.EmailField()
 
@@ -25,7 +24,6 @@ class LoginUserForm(ModelForm):
 
 
 class RegisterDriverForm(ModelForm):
-
     class Meta:
         model = Driver
         fields = ['vehicle_type', 'max_passengers', 'license_no']

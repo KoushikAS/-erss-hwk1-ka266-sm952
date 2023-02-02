@@ -1,13 +1,16 @@
 {% for message in messages %}
-    <div class="alert alert-success">
-           {{ message }}
-    </div>
+<div class="alert alert-success">
+    {{ message }}
+    {{ form.vehicle_type.errors }}
+    {{ form.max_passengers.errors }}
+    {{ form.license_no.errors }}
+</div>
 {% endfor %}
 
 {% block content %}
 <h2>Register Driver</h2>
 
-<form method="POST" action = "{% url 'registerdriver' %}" enctype="multipart/form-data">
+<form method="POST" action=" ">
     {% csrf_token %}
     {{form}}
     <button>Submit</button>
