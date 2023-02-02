@@ -32,7 +32,7 @@ ALLOWED_HOSTS = [ 'localhost', '127.0.0.1', 'web']
 
 INSTALLED_APPS = [
     'ridesharingapp.apps.RidesharingappConfig',
-   # 'crispy_forms'
+    'crispy_forms',
    # 'ridesharingapp',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,11 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-
-
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
