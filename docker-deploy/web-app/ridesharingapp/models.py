@@ -1,20 +1,23 @@
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
+
+#
+# class User(models.Model):
+#     userId = models.AutoField(primary_key=True)
+#     name = models.CharField(max_length=500, blank=False, default=None)
+#     emailId = models.CharField(max_length=500, unique=True)
 
 
-class User(models.Model):
-    userId = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=500, blank=False, default=None)
-    emailId = models.CharField(max_length=500, unique=True)
-
-
-class Driver(User):
+class Driver(models.Model):
     class VehicleType(models.TextChoices):
         FOUR_SEATER = 'FOUR_SEATER', _('4 Seats')
         SIX_SEATER = 'SIX_SEATER', _('6 Seats')
 
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=15,
                                     choices=VehicleType.choices,
                                     default=VehicleType.FOUR_SEATER, )
@@ -24,7 +27,7 @@ class Driver(User):
 
 
 class Party(models.Model):
-    owner = models.ForeignKey(User, related_name='party_owner', on_delete=models.CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='party_owner', on_delete=models.CASCADE)
     passengers = models.IntegerField(default=1)
 
 

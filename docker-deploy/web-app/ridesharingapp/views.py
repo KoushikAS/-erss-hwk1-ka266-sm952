@@ -5,6 +5,8 @@ from .serializers import *
 from .models import *
 from .forms import *
 from django.contrib import messages
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import authenticate, login
 
 
 # Just for testing purpose
@@ -28,12 +30,12 @@ def get_drivers(request):
     return JsonResponse(drivers_serialized.data, safe=False)
 
 
-# Just for Testing purpose
-def get_users(request):
-    # Should Do User Validation
-    users = User.objects.all()
-    users_serialized = UserSerializers(users, many=True)
-    return JsonResponse(users_serialized.data, safe=False)
+# # Just for Testing purpose
+# def get_users(request):
+#     # Should Do User Validation
+#     users = User.objects.all()
+#     users_serialized = UserSerializers(users, many=True)
+#     return JsonResponse(users_serialized.data, safe=False)
 
 
 def get_homepage(request):
@@ -44,35 +46,41 @@ def get_homepage(request):
 def create_user(request):
     if request.POST:
         form = RegisterUserForm(request.POST)
+        print(form.is_valid())
         if form.is_valid():
             form.save()
-            storage = messages.get_messages(request)
+            messages.success(request, f'Your account has been created. You can log in now!')
             return redirect('/login/user/')
         else:
-            messages.error(request, 'User with this EmailId already exists.')
-            return redirect('registeruser')
+            messages.error(request, f'Could not create an account')
+    else:
+        form = RegisterUserForm(request.POST)
 
-    return render(request, 'register-user-page.html', {'form': RegisterUserForm})
+    return render(request, 'register-user-page.html', {'form': form})
 
 
 def login_user(request):
     if request.POST:
-        form = LoginUserForm(request.POST)
-        email_id = request.POST['emailId']
-
-        if User.objects.filter(emailId=email_id).exists():
-            request.session['userId'] = User.objects.get(emailId=email_id).userId
-            if Driver.objects.filter(emailId=email_id).exists():
-                request.session['driverView'] = True
+        form = AuthenticationForm(data = request.POST)
+        print(form.is_valid())
+        if form.is_valid():
+            user_name = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=user_name, password=password)
+            if user is not None:
+                login(request, user)
+                # if Driver.objects.filter(user=user).exists():
+                #     request.session['driverView'] = True
+                # else:
+                #     request.session['driverView'] = False
+                messages.info(request, f"You are now logged in as {user_name}.")
+                return redirect('home')
             else:
-                request.session['driverView'] = False
-
-            return redirect('home')
+                messages.error(request, f"User not Authenticated.")
         else:
-            messages.error(request, 'EmailId is not been registered in our system.')
-            return redirect('loginuser')
+            messages.error(request, f"Something is wrong with your entry")
 
-    return render(request, 'login-user-page.html', {'form': LoginUserForm})
+    return render(request, 'login-user-page.html', {'form': AuthenticationForm})
 
 
 def logout_user(request):
@@ -94,7 +102,7 @@ def driver_registration(request):
             return redirect('registerdriver')
 
     return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
-    #return HttpResponse("Page Under Development")
+    # return HttpResponse("Page Under Development")
 
 
 # Ride Selection: View Rides accessible to the user

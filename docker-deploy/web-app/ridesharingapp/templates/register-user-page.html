@@ -1,15 +1,24 @@
 {% for message in messages %}
     <div class="alert alert-success">
-           {{ message }}
+        {{ message }}
+        {{ form.non_field_errors }}
+        {{ form.user_name.errors }}
+        {{ form.first_name.errors }}
+        {{ form.last_name.errors }}
+        {{ form.email.errors }}
+        {{ form.password1.errors }}
+        {{ form.password2.errors }}
     </div>
 {% endfor %}
 
 {% block content %}
-<h2>Register User</h2>
+<h3>Register here</h3>
+<hr>
 
-<form method="POST" action = "{% url 'registeruser' %}" enctype="multipart/form-data">
+<form action="" method="POST">
     {% csrf_token %}
-    {{form}}
-    <button>Submit</button>
+    {{ form.as_p }}
+
+    <button type="submit">Register</button>
 </form>
 {% endblock %}

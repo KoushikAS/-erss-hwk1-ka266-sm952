@@ -42,12 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-
-
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

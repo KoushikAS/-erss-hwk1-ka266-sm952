@@ -1,14 +1,19 @@
 from django.forms import ModelForm
 from django import forms
-from .models import User, Driver
+from .models import Driver
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 
-class RegisterUserForm(ModelForm):
-    emailId = forms.EmailField()
+class RegisterUserForm(UserCreationForm):
+    first_name = forms.CharField(max_length=101)
+    last_name = forms.CharField(max_length=101)
+    email = forms.EmailField()
 
     class Meta:
         model = User
-        fields = ['name', 'emailId']
+        fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
+
 
 
 class LoginUserForm(ModelForm):
@@ -20,8 +25,7 @@ class LoginUserForm(ModelForm):
 
 
 class RegisterDriverForm(ModelForm):
-    emailId = forms.EmailField()
 
     class Meta:
         model = Driver
-        fields = ['name', 'emailId', 'vehicle_type', 'max_passengers', 'license_no']
+        fields = ['vehicle_type', 'max_passengers', 'license_no']

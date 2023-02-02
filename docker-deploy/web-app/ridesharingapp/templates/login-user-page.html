@@ -1,15 +1,21 @@
 {% for message in messages %}
     <div class="alert alert-success">
-           {{ message }}
+        {{ message }}
+        {{ form.user_name.errors }}
+        {{ form.password.errors }}
     </div>
 {% endfor %}
 
 {% block content %}
-<h2>Login User</h2>
+<h3>login</h3>
 
-<form method="POST" action = "{% url 'loginuser' %}" enctype="multipart/form-data">
+<form action="" method="POST">
     {% csrf_token %}
-    {{form}}
-    <button>Submit</button>
+    {% for field in form %}
+        <p>{{ field.label }}: <br> {{ field }}</p>
+    {% endfor %}
+    <button type="submit">Login</button>
 </form>
+
+<p>Don't have an account? <a href="{% url 'registeruser' %}">Signup here</a></p>
 {% endblock %}
