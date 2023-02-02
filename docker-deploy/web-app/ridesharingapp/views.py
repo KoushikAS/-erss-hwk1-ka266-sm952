@@ -103,33 +103,6 @@ def logout_user(request):
     return redirect('home')
 
 
-def driver_registration(request):
-    check_user_authentication(request)
-
-    if Driver.objects.filter(user=request.user).exists():
-        messages.info(request, f"You have already registered as a Driver.")
-        return redirect('home')
-
-    if request.POST:
-        form = RegisterDriverForm(request.POST)
-        if form.is_valid():
-            """ Registering the new driver with current logged in user details"""
-            new_driver = form.save(commit=False)
-            new_driver.user = request.user
-            new_driver.save()
-            form.save_m2m()
-
-            request.session['driverView'] = True
-            messages.info(request, f"Successfully registered as a Driver.")
-            return redirect('home')
-        else:
-            messages.error(request, 'User with this EmailId already exists.')
-            return redirect('registerdriver')
-
-    return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
-    # return HttpResponse("Page Under Development")
-
-
 # Edit user details
 def edit_user(request):
     check_user_authentication(request)
@@ -159,9 +132,48 @@ def view_driver(request):
     return HttpResponse("Page Under Development")
 
 
+def save_driver_db(request, form):
+    """ Registering the new driver with current logged in user details"""
+    new_driver = form.save(commit=False)
+    new_driver.user = request.user
+    new_driver.save()
+    form.save_m2m()
+
+
+# Saving Driver details
+def save_driver(request, action):
+    if action == 'edit':
+        instance = Driver.objects.get(user=request.user)
+    else:
+        instance = None
+
+    if request.POST:
+        form = RegisterDriverForm(request.POST, instance=instance)
+        if form.is_valid():
+            save_driver_db(request, form)
+            request.session['driverView'] = True
+            messages.info(request, f"Successfully " + action.capitalize() + " the Driver.")
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid Entries in the form.')
+            return redirect(action + 'driver')
+    else:
+        form = RegisterDriverForm(instance=instance)
+
+    return render(request, 'driver-form.html', {'form': form, 'pageAction': action.capitalize() + ' Driver'})
+
+
+# Register as Driver
+def driver_registration(request):
+    check_user_authentication(request)
+    return save_driver(request, 'register')
+
+
 # Editing Driver details
 def edit_driver(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    check_driver_view(request)
+    return save_driver(request, 'edit')
 
 
 # Delete Driver details

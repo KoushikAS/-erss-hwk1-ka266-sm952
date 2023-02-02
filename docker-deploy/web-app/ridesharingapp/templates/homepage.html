@@ -30,6 +30,7 @@
             <a href="{% url 'logoutuser' %}">Logout?</a>
             <a href="{% url 'edituser' %}">Edit User Details</a>
             {% if request.session.driverView %}
+            <a href="{% url 'editdriver'%}">Edit Driver Detail</a>
             <a href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a>
             {% else %}
             <a href="{% url 'registerdriver'%}"> Register as Driver</a>

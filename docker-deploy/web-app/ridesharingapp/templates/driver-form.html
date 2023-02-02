@@ -8,11 +8,11 @@
 {% endfor %}
 
 {% block content %}
-<h2>Register Driver</h2>
+<h2>{{ pageAction }}</h2>
 
 <form method="POST" action=" ">
     {% csrf_token %}
     {{form}}
-    <button>Submit</button>
+    <button>{{ pageAction }}</button>
 </form>
 {% endblock %}
