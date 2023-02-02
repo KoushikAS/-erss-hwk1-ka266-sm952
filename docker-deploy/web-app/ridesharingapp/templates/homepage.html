@@ -29,7 +29,7 @@
             <h3>Welcome {{ user.username }}!</h3>
             <a href="{% url 'logoutuser' %}">Logout?</a>
             {% if request.session.driverView %}
-            UnRegister as Driver
+            <a href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a>
             {% else %}
             <a href="{% url 'registerdriver'%}"> Register as Driver</a>
             {% endif %}

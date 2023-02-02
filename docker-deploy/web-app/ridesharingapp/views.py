@@ -119,7 +119,7 @@ def driver_registration(request):
             new_driver.save()
             form.save_m2m()
 
-            request.session['driverView'] = False
+            request.session['driverView'] = True
             messages.info(request, f"Successfully registered as a Driver.")
             return redirect('home')
         else:
@@ -147,7 +147,12 @@ def edit_driver(request):
 
 # Delete Driver details
 def delete_driver(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    check_driver_view(request)
+    Driver.objects.filter(user=request.user).delete()
+    request.session['driverView'] = False
+    messages.info(request, f"Successfully un-registered as a Driver.")
+    return redirect('home')
 
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):
