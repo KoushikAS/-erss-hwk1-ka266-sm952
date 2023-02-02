@@ -12,12 +12,12 @@ from django.contrib.auth.models import User
 #     emailId = models.CharField(max_length=500, unique=True)
 
 
-class Driver(models.Model):
+class Driver(User):
     class VehicleType(models.TextChoices):
         FOUR_SEATER = 'FOUR_SEATER', _('4 Seats')
         SIX_SEATER = 'SIX_SEATER', _('6 Seats')
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    #user = models.OneToOneField(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=15,
                                     choices=VehicleType.choices,
                                     default=VehicleType.FOUR_SEATER, )

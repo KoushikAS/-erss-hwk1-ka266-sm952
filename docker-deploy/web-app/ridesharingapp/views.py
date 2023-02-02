@@ -62,18 +62,21 @@ def create_user(request):
 def login_user(request):
     if request.POST:
         form = AuthenticationForm(data = request.POST)
-        print(form.is_valid())
+
         if form.is_valid():
-            user_name = form.cleaned_data.get('username')
+            username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            user = authenticate(username=user_name, password=password)
+            user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                # if Driver.objects.filter(user=user).exists():
-                #     request.session['driverView'] = True
-                # else:
-                #     request.session['driverView'] = False
-                messages.info(request, f"You are now logged in as {user_name}.")
+                print(user.id)
+                print(user.username)
+                if Driver.objects.filter(username =username).exists():
+                    request.session['driverView'] = True
+                else:
+                    request.session['driverView'] = False
+
+                messages.info(request, f"You are now logged in as {username}.")
                 return redirect('home')
             else:
                 messages.error(request, f"User not Authenticated.")
