@@ -7,6 +7,8 @@ from .forms import *
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.http import Http404
+from django.forms.models import model_to_dict
 
 
 # Just for testing purpose
@@ -54,21 +56,30 @@ def get_homepage(request):
     return render(request, 'homepage.html')
 
 
-# register user
-def create_user(request):
+# Save user details
+def save_user(request, action, instance):
     if request.POST:
-        form = RegisterUserForm(request.POST)
-        print(form.is_valid())
+        form = RegisterUserForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Your account has been created. You can log in now!')
+            messages.success(request, action.capitalize() + " User is successful. Can you log in now!")
             return redirect('loginuser')
         else:
-            messages.error(request, f'Could not create an account')
+            messages.error(request, f'Invalid Entry')
     else:
-        form = RegisterUserForm(request.POST)
+        form = RegisterUserForm(instance=instance)
+    return render(request, 'user-form.html', {'form': form, 'pageAction': action.capitalize() + ' User'})
 
-    return render(request, 'register-user-page.html', {'form': form})
+
+# Register new user
+def create_user(request):
+    return save_user(request, 'register', None)
+
+
+# Edit User
+def edit_user(request):
+    check_user_authentication(request)
+    return save_user(request, 'edit', request.user)
 
 
 def login_user(request):
@@ -103,47 +114,49 @@ def logout_user(request):
     return redirect('home')
 
 
-def driver_registration(request):
-    check_user_authentication(request)
+def save_driver_db(request, form):
+    """ Registering the new driver with current logged in user details"""
+    new_driver = form.save(commit=False)
+    new_driver.user = request.user
+    new_driver.save()
+    form.save_m2m()
 
-    if Driver.objects.filter(user=request.user).exists():
-        messages.info(request, f"You have already registered as a Driver.")
-        return redirect('home')
+
+# Saving Driver details
+def save_driver(request, action):
+    if action == 'edit':
+        instance = Driver.objects.get(user=request.user)
+    else:
+        instance = None
 
     if request.POST:
-        form = RegisterDriverForm(request.POST)
+        form = RegisterDriverForm(request.POST, instance=instance)
         if form.is_valid():
-            """ Registering the new driver with current logged in user details"""
-            new_driver = form.save(commit=False)
-            new_driver.user = request.user
-            new_driver.save()
-            form.save_m2m()
-
+            save_driver_db(request, form)
             request.session['driverView'] = True
-            messages.info(request, f"Successfully registered as a Driver.")
+            messages.info(request, f"Successfully " + action.capitalize() + " the Driver.")
             return redirect('home')
         else:
-            messages.error(request, 'User with this EmailId already exists.')
-            return redirect('registerdriver')
+            messages.error(request, 'Invalid Entries in the form.')
+            return redirect(action + 'driver')
+    else:
+        form = RegisterDriverForm(instance=instance)
 
-    return render(request, 'register-driver-page.html', {'form': RegisterDriverForm})
-    # return HttpResponse("Page Under Development")
+    return render(request, 'driver-form.html', {'form': form, 'pageAction': action.capitalize() + ' Driver'})
 
-# View user details
-def view_user(request):
-    return HttpResponse("Page Under Development")
 
-# Editing user details
-def edit_user(request):
-    return HttpResponse("Page Under Development")
+# Register as Driver
+def driver_registration(request):
+    check_user_authentication(request)
+    return save_driver(request, 'register')
 
-# View Driver details
-def view_driver(request):
-    return HttpResponse("Page Under Development")
 
 # Editing Driver details
 def edit_driver(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    check_driver_view(request)
+    return save_driver(request, 'edit')
+
 
 # Delete Driver details
 def delete_driver(request):
@@ -154,24 +167,63 @@ def delete_driver(request):
     messages.info(request, f"Successfully un-registered as a Driver.")
     return redirect('home')
 
+
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    rides = Ride.objects.filter(rideOwner_party=request.user).all()
+    rides_serialized = RideSerializers(rides, many=True)
+    return JsonResponse(rides_serialized.data, safe=False)
 
 
 # Ride Requesting
 def create_ride(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    form = RideForm(request.POST)
+    if form.is_valid():
+        party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+        party.save()
+        ride = Ride(source=form.cleaned_data['source'],
+                    destination=form.cleaned_data['destination'],
+                    destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                    rideOwner=party,
+                    isSharable=form.cleaned_data['isSharable'])
+        ride.save()
+        return redirect('viewride', rideId=ride.rideId)
+    return render(request, 'request-edit-ride.html', {'form': form})
 
 
 # Ride Requesting Editing
-def edit_ride(request):
-    return HttpResponse("Page Under Development")
+def edit_ride(request, rideId):
+    try:
+        ride = Ride.objects.get(rideId=rideId)
+    except Ride.DoesNotExist:
+        raise Http404('Ride not found!')
+    print(model_to_dict(ride))
+    form = RideForm(request.POST, instance=ride)
+    if form.is_valid():
+        party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+        party.save()
+        ride = Ride(rideId=ride.rideId,
+                    source=form.cleaned_data['source'],
+                    destination=form.cleaned_data['destination'],
+                    destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                    rideOwner=party,
+                    isSharable=form.cleaned_data['isSharable'])
+        ride.save()
+        return redirect('viewride', rideId=ride.rideId)
+    return render(request, 'request-edit-ride.html', {'form': form})
 
 
 # Ride Status Viewing: View Individual Ride
-def view_ride(request):
-    return HttpResponse("Page Under Development")
+def view_ride(request, rideId):
+    try:
+        ride = Ride.objects.get(rideId=rideId)
+    except Ride.DoesNotExist:
+        raise Http404('Ride not found!')
+
+    ride_serialized = RideSerializers(ride, many=False)
+    return JsonResponse(ride_serialized.data, safe=False)
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver

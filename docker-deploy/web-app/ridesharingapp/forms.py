@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Driver
+from .models import Driver, Ride
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
@@ -27,3 +27,14 @@ class RegisterDriverForm(ModelForm):
     class Meta:
         model = Driver
         fields = ['vehicle_type', 'max_passengers', 'license_no']
+
+
+class RideForm(ModelForm):
+    passengers = forms.IntegerField(max_value=4, min_value=1)
+
+    class Meta:
+        model = Ride
+        fields = ['source',
+                  'destination',
+                  'destinationArrivalTimeStamp',
+                  'isSharable']
