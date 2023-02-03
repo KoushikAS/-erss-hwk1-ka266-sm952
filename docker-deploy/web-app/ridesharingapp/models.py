@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -21,7 +20,7 @@ class Driver(models.Model):
 
 
 class Party(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='party_owner', on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, related_name='party_owner', on_delete=models.CASCADE)
     passengers = models.IntegerField(default=1)
 
 

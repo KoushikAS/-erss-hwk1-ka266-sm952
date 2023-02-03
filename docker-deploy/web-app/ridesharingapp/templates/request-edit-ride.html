@@ -1,0 +1,9 @@
+<form method="POST" action="{% url 'createride' %}" enctype="multipart/form-data">
+    {% if user.is_authenticated %}
+    {% csrf_token %}
+    {{form.as_p}}
+    <button>Submit</button>
+    {% else %}
+    You must log in!
+    {% endif %}
+</form>

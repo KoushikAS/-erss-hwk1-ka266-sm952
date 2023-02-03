@@ -7,6 +7,8 @@ from .forms import *
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.http import Http404
+from django.forms.models import model_to_dict
 
 
 # Just for testing purpose
@@ -156,22 +158,60 @@ def delete_driver(request):
 
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    rides = Ride.objects.filter(rideOwner_party=request.user).all()
+    rides_serialized = RideSerializers(rides, many=True)
+    return JsonResponse(rides_serialized.data, safe=False)
 
 
 # Ride Requesting
 def create_ride(request):
-    return HttpResponse("Page Under Development")
+    check_user_authentication(request)
+    form = RideForm(request.POST)
+    if form.is_valid():
+        party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+        party.save()
+        ride = Ride(source=form.cleaned_data['source'],
+                    destination=form.cleaned_data['destination'],
+                    destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                    rideOwner=party,
+                    isSharable=form.cleaned_data['isSharable'])
+        ride.save()
+        return redirect('viewride', rideId=ride.rideId)
+    return render(request, 'request-edit-ride.html', {'form': form})
 
 
 # Ride Requesting Editing
-def edit_ride(request):
-    return HttpResponse("Page Under Development")
+def edit_ride(request, rideId):
+    try:
+        ride = Ride.objects.get(rideId=rideId)
+    except Ride.DoesNotExist:
+        raise Http404('Ride not found!')
+    print(model_to_dict(ride))
+    form = RideForm(request.POST, instance=ride)
+    if form.is_valid():
+        party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+        party.save()
+        ride = Ride(rideId=ride.rideId,
+                    source=form.cleaned_data['source'],
+                    destination=form.cleaned_data['destination'],
+                    destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                    rideOwner=party,
+                    isSharable=form.cleaned_data['isSharable'])
+        ride.save()
+        return redirect('viewride', rideId=ride.rideId)
+    return render(request, 'request-edit-ride.html', {'form': form})
 
 
 # Ride Status Viewing: View Individual Ride
-def view_ride(request):
-    return HttpResponse("Page Under Development")
+def view_ride(request, rideId):
+    try:
+        ride = Ride.objects.get(rideId=rideId)
+    except Ride.DoesNotExist:
+        raise Http404('Ride not found!')
+
+    ride_serialized = RideSerializers(ride, many=False)
+    return JsonResponse(ride_serialized.data, safe=False)
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
