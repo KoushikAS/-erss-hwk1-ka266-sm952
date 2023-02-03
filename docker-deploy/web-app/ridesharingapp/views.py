@@ -54,21 +54,30 @@ def get_homepage(request):
     return render(request, 'homepage.html')
 
 
-# register user
-def create_user(request):
+# Save user details
+def save_user(request, action, instance):
     if request.POST:
-        form = RegisterUserForm(request.POST)
-
+        form = RegisterUserForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Your account has been created. You can log in now!')
+            messages.success(request, action.capitalize() + " User is successful. Can you log in now!")
             return redirect('loginuser')
         else:
-            messages.error(request, f'Could not create an account')
+            messages.error(request, f'Invalid Entry')
     else:
-        form = RegisterUserForm(request.POST)
+        form = RegisterUserForm(instance=instance)
+    return render(request, 'user-form.html', {'form': form, 'pageAction': action.capitalize() + ' User'})
 
-    return render(request, 'register-user-page.html', {'form': form, 'pageAction': 'Register User'})
+
+# Register new user
+def create_user(request):
+    return save_user(request, 'register', None)
+
+
+# Edit User
+def edit_user(request):
+    check_user_authentication(request)
+    return save_user(request, 'edit', request.user)
 
 
 def login_user(request):
@@ -101,35 +110,6 @@ def logout_user(request):
     messages.info(request, f"You have successfully logged out.")
 
     return redirect('home')
-
-
-# Edit user details
-def edit_user(request):
-    check_user_authentication(request)
-    if request.POST:
-        form = RegisterUserForm(request.POST, instance=request.user)
-
-        if form.is_valid():
-            form.save()
-            logout(request)
-            messages.success(request, f'Your account has been Edited. Please login again')
-            return redirect('loginuser')
-        else:
-            messages.error(request, f'Could not Edit the account')
-    else:
-        form = RegisterUserForm(instance=request.user)
-
-    return render(request, 'user-form.html', {'form': form, 'pageAction': 'Edit User'})
-
-
-# View user details
-def view_user(request):
-    return HttpResponse("Page Under Development")
-
-
-# View Driver details
-def view_driver(request):
-    return HttpResponse("Page Under Development")
 
 
 def save_driver_db(request, form):
