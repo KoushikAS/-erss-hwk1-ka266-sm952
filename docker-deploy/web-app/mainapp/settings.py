@@ -48,9 +48,9 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -78,7 +78,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mainapp.wsgi.application'
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000'
+    'http://localhost:8000',
 ]
 
 # Database

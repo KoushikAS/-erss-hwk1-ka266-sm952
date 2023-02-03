@@ -1,0 +1,36 @@
+<h2>
+    Upcoming Rides
+</h2>
+<table class="table table-hover table-striped">
+    <thead>
+    <tr>
+        <th scope="col">Status</th>
+        <th scope="col">Source</th>
+        <th scope="col">Destination</th>
+        <th scope="col">Arrival Time</th>
+        <th scope="col">Driver</th>
+
+        <th scope="col">Sharable</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for ride in rides %}
+    <tr>
+        {% if ride.status == 'OPEN' %}
+        <td><a href="http://localhost:8000/rides/view/1" + {{ride.rideid}}>{{ride.status}}</a></td>
+        {% else %}
+        <td>{{ride.status}}</td>
+        {% endif %}
+        <td>{{ride.source}}</td>
+        <td> {{ride.destination}}</td>
+        <td>{{ride.destinationArrivalTimeStamp}}</td>
+        {% if ride.driver %}
+        <td>{{ride.driver.user.username}}</td>
+        {% else %}
+        <td>{{ride.driver}}</td>
+        {% endif %}
+        <td>{{ride.isSharable}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
