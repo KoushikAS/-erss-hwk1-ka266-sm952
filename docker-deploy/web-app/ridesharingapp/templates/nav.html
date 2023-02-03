@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="p-3 navbar-brand" href="{% url 'home' %}">
+        ECE-568 Project 1
+    </a>
+
+    {% if user.is_authenticated %}
+    <ul class="nav navbar-nav ">
+        <li><a class="nav-link" href="{% url 'edituser' %}">Edit User Details</a></li>
+        <li><a class="nav-link" href="{% url 'createride' %}">Create Ride</a></li>
+        {% if request.session.driverView %}
+        <li><a class="nav-link" href="{% url 'editdriver'%}">Edit Driver Detail</a></li>
+        <li><a class="nav-link" href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a></li>
+        {% else %}
+        <li><a class="nav-link" href="{% url 'registerdriver'%}"> Register as Driver</a></li>
+        {% endif %}
+        <li><a class="nav-link" href="{% url 'logoutuser' %}">Logout</a></li>
+    </ul>
+    {% endif %}
+
+</nav>
+
+
+{% for message in messages %}
+<div class="alert alert-success">
+    {{ message }}
+</div>
+{% endfor %}
+
+
+{% for field in form %}
+<div class="alert alert-warning">
+    {{ field.errors }}
+</div>
+{% endfor %}

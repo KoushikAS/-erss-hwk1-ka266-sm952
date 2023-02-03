@@ -12,11 +12,6 @@ from django.forms.models import model_to_dict
 
 
 # Just for testing purpose
-def say_hello(request):
-    return HttpResponse("Hello World")
-
-
-# Just for testing purpose
 def get_rides(request):
     # Should Do User Validation
     rides = Ride.objects.all()
@@ -54,6 +49,10 @@ def check_driver_view(request):
 
 def get_homepage(request):
     return render(request, 'homepage.html')
+
+
+def get_nav(request):
+    return render(request, 'nav.html')
 
 
 # Save user details
@@ -171,9 +170,10 @@ def delete_driver(request):
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):
     check_user_authentication(request)
-    rides = Ride.objects.filter(rideOwner_party=request.user).all()
+    rides = Ride.objects.filter(rideOwner__owner=request.user.id).all()
     rides_serialized = RideSerializers(rides, many=True)
-    return JsonResponse(rides_serialized.data, safe=False)
+    print(rides_serialized)
+    return render(request, 'view-own-rides.html', {'rides': rides_serialized.data})
 
 
 # Ride Requesting
