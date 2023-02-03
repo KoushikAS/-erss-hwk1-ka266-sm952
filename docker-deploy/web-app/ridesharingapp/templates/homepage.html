@@ -17,6 +17,7 @@
     {% if user.is_authenticated %}
     <ul class="nav navbar-nav ">
         <li><a class="nav-link" href="{% url 'edituser' %}">Edit User Details</a></li>
+        <li><a class="nav-link" href="{% url 'createride' %}">Create Ride</a></li>
         {% if request.session.driverView %}
         <li><a class="nav-link" href="{% url 'editdriver'%}">Edit Driver Detail</a></li>
         <li><a class="nav-link" href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a></li>
@@ -39,8 +40,8 @@
 <h3>Welcome {{request.user.username}}!</h3>
 {% else %}
 <div class="jumbotron">
-    <h1 class="display-4">Welcome to ECE 568 Project1</h1>
-    <p class="lead">This is a simple ride sharing app, developed by Koushik and Shravan.</p>
+    <h1 class="display-4">Hello World!</h1>
+    <p class="lead">Welcome to ECE 568 Project1. This is a simple ride sharing app, developed by Koushik and Shravan.</p>
     <p>It has bunch of cool features like booking a cab, sharing a cab, accepting a ride and man more. Come join us</p>
     <p class="lead">
         <a class="btn btn-outline-dark btn-lg" href="{% url 'registeruser' %}" role="button">Register</a>

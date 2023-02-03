@@ -3,6 +3,7 @@ from django import forms
 from .models import Driver, Ride
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.admin.widgets import AdminDateWidget
 
 
 class RegisterUserForm(UserCreationForm):
@@ -31,10 +32,10 @@ class RegisterDriverForm(ModelForm):
 
 class RideForm(ModelForm):
     passengers = forms.IntegerField(max_value=4, min_value=1)
+    destinationArrivalTimeStamp = forms.DateTimeField()
 
     class Meta:
         model = Ride
-        fields = ['source',
-                  'destination',
-                  'destinationArrivalTimeStamp',
-                  'isSharable']
+        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'isSharable']
+
+
