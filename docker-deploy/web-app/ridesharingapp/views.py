@@ -59,7 +59,14 @@ def get_homepage(request):
 
 def get_driver_homepage(request):
     check_driver_view(request)
-    return render(request, 'driver-home.html')
+
+    driver = Driver.objects.get(user=request.user)
+    currentRide = None
+
+    if Ride.objects.filter(driver_id=driver.id, status=Ride.RideStatus.CONFIRMED).exists():
+        currentRide = Ride.objects.get(driver_id=driver.id, status=Ride.RideStatus.CONFIRMED)
+
+    return render(request, 'driver-home.html', {'currentRide': currentRide})
 
 
 def get_nav(request):
@@ -251,15 +258,14 @@ def view_ride(request, rideId):
     if ownerParty.owner_id == request.user.id and ride.status == Ride.RideStatus.OPEN:
         canEdit = True
 
-
     # Todo Check if the ride owner or share has the driver in it.
 
     if request.session.get('driverView'):
 
-        if   ride.status == Ride.RideStatus.OPEN:
+        if ride.status == Ride.RideStatus.OPEN:
             canConfirmRide = True
 
-        if  ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id = ride.driver_id).exists():
+        if ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id=ride.driver_id).exists():
             canCompleteRide = True
 
     if ride.driver:
@@ -272,7 +278,7 @@ def view_ride(request, rideId):
 
     return render(request, 'view-ride.html',
                   {'ride': ride_serialized.data, 'canEdit': canEdit, 'driver': driver, 'driverName': driverName,
-                   'canConfirmRide': canConfirmRide , 'canCompleteRide': canCompleteRide})
+                   'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide})
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
@@ -298,8 +304,8 @@ def ride_complete(request, rideId):
         return redirect('driverhome')
 
     driver = Driver.objects.get(user=request.user)
-    if ride.driver == driver:
-        messages.error(request, f"This Ride is started by you.")
+    if ride.driver != driver:
+        messages.error(request, f"This Ride is not started by you.")
         return redirect('driverhome')
 
     ride.status = Ride.RideStatus.COMPLETED
