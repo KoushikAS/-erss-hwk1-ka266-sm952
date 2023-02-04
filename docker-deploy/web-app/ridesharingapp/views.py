@@ -47,8 +47,18 @@ def check_driver_view(request):
         return redirect('registerdriver')
 
 
+def check_ride_exists(request, rideId):
+    if not Ride.objects.filter(rideId=rideId).exists():
+        messages.error(request, f"Ride Id Does not exists.")
+        return redirect('home')
+
 def get_homepage(request):
     return render(request, 'homepage.html')
+
+
+def get_driver_homepage(request):
+    check_driver_view(request)
+    return render(request, 'driver-home.html')
 
 
 def get_nav(request):
@@ -172,8 +182,16 @@ def view_rides(request):
     check_user_authentication(request)
     rides = Ride.objects.filter(rideOwner__owner=request.user.id).all()
     rides_serialized = RideSerializers(rides, many=True)
-    print(rides_serialized)
-    return render(request, 'view-own-rides.html', {'rides': rides_serialized.data})
+    return render(request, 'view-rides.html', {'rides': rides_serialized.data})
+
+
+# Ride Selection: View Rides accessible to the Driver
+def view_rides_driver(request):
+    check_user_authentication(request)
+    check_driver_view(request)
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).all()
+    rides_serialized = RideSerializers(rides, many=True)
+    return render(request, 'view-rides.html', {'rides': rides_serialized.data})
 
 
 # Ride Requesting
@@ -186,6 +204,8 @@ def create_ride(request):
         ride = Ride(source=form.cleaned_data['source'],
                     destination=form.cleaned_data['destination'],
                     destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                    maxPassengers=form.cleaned_data['maxPassengers'],
+                    availablePassengers=form.cleaned_data['maxPassengers'] - form.cleaned_data['passengers'],
                     rideOwner=party,
                     isSharable=form.cleaned_data['isSharable'])
         ride.save()
@@ -217,13 +237,16 @@ def edit_ride(request, rideId):
 
 # Ride Status Viewing: View Individual Ride
 def view_ride(request, rideId):
-    try:
-        ride = Ride.objects.get(rideId=rideId)
-    except Ride.DoesNotExist:
-        raise Http404('Ride not found!')
-
+    check_user_authentication(request)
+    check_ride_exists(request, rideId)
+    ride = Ride.objects.get(rideId=rideId)
     ride_serialized = RideSerializers(ride, many=False)
-    return JsonResponse(ride_serialized.data, safe=False)
+    ownerParty = Party.objects.get(id=ride.rideOwner_id)
+    if ownerParty.owner_id == request.user.id:
+        canEdit = True
+    else:
+        canEdit = False
+    return render(request, 'view-ride.html', {'ride': ride_serialized.data, 'canEdit': canEdit})
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
@@ -242,5 +265,24 @@ def ride_complete(request):
 
 
 # Ride Cnfirmed: when driver confirms the ride
-def ride_confirmed(request):
-    return HttpResponse("Page Under Development")
+def ride_confirmed(request , rideId):
+    check_user_authentication(request)
+    check_driver_view(request)
+    check_ride_exists(request,rideId)
+
+    ride = Ride.objects.get(rideId=rideId)
+
+    if ride.status != Ride.RideStatus.OPEN:
+        messages.error(request, f"Ride Is already confirmed.")
+        return redirect('driverhome')
+
+    driver = Driver.objects.get(user=request.user)
+    if ride.maxPassengers > driver.max_passengers:
+        messages.error(request, f"This Ride is not compatible with your car.")
+        return redirect('driverhome')
+
+    ride.driver = driver
+    ride.status = Ride.RideStatus.CONFIRMED
+    ride.save()
+    messages.success(request, " Successfully Confirmed the ride!")
+    return redirect('driverhome')
