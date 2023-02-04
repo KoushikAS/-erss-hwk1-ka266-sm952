@@ -223,10 +223,14 @@ def create_ride(request):
 
 # Ride Requesting Editing
 def edit_ride(request, rideId):
+    check_user_authentication(request)
     try:
         ride = Ride.objects.get(rideId=rideId)
     except Ride.DoesNotExist:
         messages.error(request, f"Ride not found!")
+        return redirect('home')
+    if request.user.id != ride.rideOwner_id:
+        messages.error(request, f"Not authorized!")
         return redirect('home')
     if ride.isRideEditable():
         data = {
