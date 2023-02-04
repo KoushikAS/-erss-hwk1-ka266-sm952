@@ -89,10 +89,12 @@ $(function(){
     <p class="lead">
         {% if canEdit %}
         <a class="btn btn-outline-dark " href="{% url 'editride' ride.rideId %}" role="button">Edit Ride</a>
-        {% else %}
-        {% if request.session.driverView %}
+        {% endif %}
+        {% if canConfirmRide %}
         <a class="btn btn-outline-dark " href="{% url 'confirmride' ride.rideId %}" role="button">Confirm Ride</a>
         {% endif %}
+        {% if canCompleteRide %}
+        <a class="btn btn-outline-dark " href="{% url 'completeride' ride.rideId %}" role="button">Complete Ride</a>
         {% endif %}
     </p>
 </div>
