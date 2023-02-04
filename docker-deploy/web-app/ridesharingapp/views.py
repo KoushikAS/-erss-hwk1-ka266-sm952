@@ -254,6 +254,7 @@ def view_ride(request, rideId):
     canConfirmRide = False
     canEdit = False
     canCompleteRide = False
+    canJoinRide = False
 
     if ownerParty.owner_id == request.user.id and ride.status == Ride.RideStatus.OPEN:
         canEdit = True
@@ -268,6 +269,10 @@ def view_ride(request, rideId):
         if ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id=ride.driver_id).exists():
             canCompleteRide = True
 
+
+    if ride.isSharable is True and ride.status == Ride.RideStatus.OPEN and ownerParty.owner_id != request.user.id:
+        canJoinRide = True
+
     if ride.driver:
         driver = Driver.objects.get(id=ride.driver_id);
         driverUser = User.objects.get(id=driver.user_id);
@@ -278,7 +283,7 @@ def view_ride(request, rideId):
 
     return render(request, 'view-ride.html',
                   {'ride': ride_serialized.data, 'canEdit': canEdit, 'driver': driver, 'driverName': driverName,
-                   'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide})
+                   'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide, 'canJoinRide': canJoinRide})
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
@@ -338,3 +343,31 @@ def ride_confirmed(request, rideId):
     ride.save()
     messages.success(request, " Successfully Confirmed the ride!")
     return redirect('driverhome')
+
+
+# Join a sharable Ride.
+def join_ride(request, rideId):
+    check_user_authentication(request)
+    check_ride_exists(rideId)
+
+    if request.POST:
+        form = RegisterUserForm(request.POST)
+        if form.is_valid():
+            ride = Ride.objects().get(id=rideId)
+
+            if ride.availablePassengers > form.cleaned_data['passengers']:
+                messages.error(request, f"Party can only accommodate " + ride.availablePassengers + ". Please try "
+                                                                                                    "another ride!")
+                return redirect('home')
+
+            party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+            party.save()
+            ride.availablePassengers = ride.availablePassengers - form.cleaned_data['passengers']
+            ride.rideShared.add(party)
+            messages.success(request, " Successfully Joined the ride.")
+            return redirect('home')
+        else:
+            messages.error(request, f'Invalid Entry')
+    else:
+        form = RegisterUserForm()
+    return render(request, 'party-form.html', {'form': form, 'rideId': rideId})
