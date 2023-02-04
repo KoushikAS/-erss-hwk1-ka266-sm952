@@ -213,7 +213,8 @@ def create_ride(request):
                     maxPassengers=form.cleaned_data['maxPassengers'],
                     availablePassengers=form.cleaned_data['maxPassengers'] - form.cleaned_data['passengers'],
                     rideOwner=party,
-                    isSharable=form.cleaned_data['isSharable'])
+                    isSharable=form.cleaned_data['isSharable'],
+                    vehicleType=form.cleaned_data['vehicleType'])
         ride.save()
         return redirect('viewride', rideId=ride.rideId)
     else:
@@ -229,7 +230,7 @@ def edit_ride(request, rideId):
     except Ride.DoesNotExist:
         messages.error(request, f"Ride not found!")
         return redirect('home')
-    if request.user.id != ride.rideOwner_id:
+    if request.user.id != ride.rideOwner.owner_id:
         messages.error(request, f"Not authorized!")
         return redirect('home')
     if ride.isRideEditable():
@@ -244,7 +245,7 @@ def edit_ride(request, rideId):
         edit_form = RideForm(initial=data)
         if request.POST:
             try:
-                party = Party.objects.get(owner=request.user)
+                party = Party.objects.get(id=ride.rideOwner_id)
             except Party.DoesNotExist:
                 messages.error(request, f"Party not found!")
                 return redirect('home')
@@ -259,6 +260,7 @@ def edit_ride(request, rideId):
                 ride.destinationArrivalTimeStamp = form.cleaned_data['destinationArrivalTimeStamp']
                 ride.rideOwner = party
                 ride.isSharable = form.cleaned_data['isSharable']
+                ride.vehicleType = form.cleaned_data['vehicleType']
                 ride.save()
                 return redirect('viewride', rideId=ride.rideId)
             else:
@@ -441,7 +443,7 @@ def delete_ride(request, rideId):
         ride = Ride.objects.get(rideId=rideId)
     except Ride.DoesNotExist:
         messages.error(request, f"Ride not found!")
-    if request.user.id != ride.rideOwner_id:
+    if request.user.id != ride.rideOwner.owner_id:
         messages.error(request, f"Not authorized!")
     else:
         if ride.isRideEditable():

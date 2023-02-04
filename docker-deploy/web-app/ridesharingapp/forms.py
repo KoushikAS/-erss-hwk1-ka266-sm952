@@ -42,7 +42,8 @@ class RideForm(ModelForm):
 
     class Meta:
         model = Ride
-        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'passengers', 'maxPassengers', 'isSharable']
+        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'passengers', 'maxPassengers', 'vehicleType',
+                  'isSharable']
 
 
 class OpenRidesForm(forms.Form):

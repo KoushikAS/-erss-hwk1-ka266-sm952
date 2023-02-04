@@ -5,11 +5,12 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
 
-class Driver(models.Model):
-    class VehicleType(models.TextChoices):
-        FOUR_SEATER = 'FOUR_SEATER', _('4 Seats')
-        SIX_SEATER = 'SIX_SEATER', _('6 Seats')
+class VehicleType(models.TextChoices):
+    FOUR_SEATER = 'FOUR_SEATER', _('4 Seats')
+    SIX_SEATER = 'SIX_SEATER', _('6 Seats')
 
+
+class Driver(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=15,
                                     choices=VehicleType.choices,
@@ -47,6 +48,6 @@ class Ride(models.Model):
                                         validators=[MaxValueValidator(8), MinValueValidator(1)])
     availablePassengers = models.IntegerField(default=4,
                                         validators=[MaxValueValidator(8), MinValueValidator(1)])
-
+    vehicleType = models.CharField(max_length=15, choices=VehicleType.choices, blank=True, null=True)
     def isRideEditable(self):
         return self.status == self.RideStatus.OPEN
