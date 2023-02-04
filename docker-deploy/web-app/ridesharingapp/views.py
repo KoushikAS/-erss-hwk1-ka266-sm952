@@ -7,8 +7,6 @@ from .forms import *
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
-from django.http import Http404
-from django.forms.models import model_to_dict
 
 
 # Just for testing purpose
@@ -210,7 +208,9 @@ def create_ride(request):
                     isSharable=form.cleaned_data['isSharable'])
         ride.save()
         return redirect('viewride', rideId=ride.rideId)
-    return render(request, 'request-edit-ride.html', {'form': form})
+    else:
+        messages.error(request, 'Invalid Entries in the form.')
+    return render(request, 'create-ride.html', {'form': form})
 
 
 # Ride Requesting Editing
@@ -218,21 +218,43 @@ def edit_ride(request, rideId):
     try:
         ride = Ride.objects.get(rideId=rideId)
     except Ride.DoesNotExist:
-        raise Http404('Ride not found!')
-    print(model_to_dict(ride))
-    form = RideForm(request.POST, instance=ride)
-    if form.is_valid():
-        party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
-        party.save()
-        ride = Ride(rideId=ride.rideId,
-                    source=form.cleaned_data['source'],
-                    destination=form.cleaned_data['destination'],
-                    destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
-                    rideOwner=party,
-                    isSharable=form.cleaned_data['isSharable'])
-        ride.save()
-        return redirect('viewride', rideId=ride.rideId)
-    return render(request, 'request-edit-ride.html', {'form': form})
+        messages.error(request, f"Ride not found!")
+        return redirect('home')
+    if ride.isRideEditable():
+        data = {
+            'source': ride.source,
+            'destination': ride.destination,
+            'destinationArrivalTimeStamp': ride.destinationArrivalTimeStamp,
+            'passengers': ride.rideOwner.passengers,
+            'maxPassengers': ride.maxPassengers,
+            'isSharable': ride.isSharable
+        }
+        edit_form = RideForm(initial=data)
+        if request.POST:
+            try:
+                party = Party.objects.get(owner=request.user)
+            except Party.DoesNotExist:
+                messages.error(request, f"Party not found!")
+                return redirect('home')
+            form = RideForm(request.POST)
+            if form.is_valid():
+                party.passengers = form.cleaned_data['passengers']
+                party.save()
+                ride.source = form.cleaned_data['source']
+                ride.destination = form.cleaned_data['destination']
+                ride.maxPassengers = form.cleaned_data['maxPassengers']
+                ride.availablePassengers = form.cleaned_data['maxPassengers'] - form.cleaned_data['passengers']
+                ride.destinationArrivalTimeStamp = form.cleaned_data['destinationArrivalTimeStamp']
+                ride.rideOwner = party
+                ride.isSharable = form.cleaned_data['isSharable']
+                ride.save()
+                return redirect('viewride', rideId=ride.rideId)
+            else:
+                messages.error(request, 'Invalid Entries in the form.')
+    else:
+        messages.error(request, f"Ride Is already confirmed.")
+        return redirect('home')
+    return render(request, 'edit-ride.html', {'form': edit_form})
 
 
 # Ride Status Viewing: View Individual Ride
