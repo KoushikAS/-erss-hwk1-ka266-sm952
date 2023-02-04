@@ -8,6 +8,7 @@
         <th scope="col">Source</th>
         <th scope="col">Destination</th>
         <th scope="col">Arrival Time</th>
+        <th scope="col">Max Passengers</th>
         <th scope="col">Driver</th>
 
         <th scope="col">Sharable</th>
@@ -17,13 +18,14 @@
     {% for ride in rides %}
     <tr>
         {% if ride.status == 'OPEN' %}
-        <td><a href="http://localhost:8000/rides/view/1" + {{ride.rideid}}>{{ride.status}}</a></td>
+        <td><a href="{% url 'viewride' ride.rideId %}">{{ride.status}}</a></td>
         {% else %}
         <td>{{ride.status}}</td>
         {% endif %}
         <td>{{ride.source}}</td>
         <td> {{ride.destination}}</td>
         <td>{{ride.destinationArrivalTimeStamp}}</td>
+        <td> {{ride.maxPassengers}}</td>
         {% if ride.driver %}
         <td>{{ride.driver.user.username}}</td>
         {% else %}

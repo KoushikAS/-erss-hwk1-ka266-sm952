@@ -43,6 +43,10 @@ class Ride(models.Model):
         choices=RideStatus.choices,
         default=RideStatus.OPEN,
     )
+    maxPassengers = models.IntegerField(default=4,
+                                        validators=[MaxValueValidator(8), MinValueValidator(1)])
+    availablePassengers = models.IntegerField(default=4,
+                                        validators=[MaxValueValidator(8), MinValueValidator(1)])
 
     def isRideEditable(self):
         return self.RideStatus == self.RideStatus.OPEN

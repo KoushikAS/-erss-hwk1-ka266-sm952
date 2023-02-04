@@ -47,6 +47,13 @@ def check_driver_view(request):
         return redirect('registerdriver')
 
 
+def check_ride_exists(request, rideId):
+    print(rideId)
+    if not Ride.objects.filter(rideId=rideId).exists():
+        messages.error(request, f"Ride Id Does not exists.")
+        return redirect('home')
+
+
 def get_homepage(request):
     return render(request, 'homepage.html')
 
@@ -172,7 +179,6 @@ def view_rides(request):
     check_user_authentication(request)
     rides = Ride.objects.filter(rideOwner__owner=request.user.id).all()
     rides_serialized = RideSerializers(rides, many=True)
-    print(rides_serialized)
     return render(request, 'view-own-rides.html', {'rides': rides_serialized.data})
 
 
@@ -186,6 +192,8 @@ def create_ride(request):
         ride = Ride(source=form.cleaned_data['source'],
                     destination=form.cleaned_data['destination'],
                     destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                    maxPassengers=form.cleaned_data['maxPassengers'],
+                    availablePassengers=form.cleaned_data['maxPassengers'] - form.cleaned_data['passengers'],
                     rideOwner=party,
                     isSharable=form.cleaned_data['isSharable'])
         ride.save()
@@ -217,13 +225,12 @@ def edit_ride(request, rideId):
 
 # Ride Status Viewing: View Individual Ride
 def view_ride(request, rideId):
-    try:
-        ride = Ride.objects.get(rideId=rideId)
-    except Ride.DoesNotExist:
-        raise Http404('Ride not found!')
+    check_user_authentication(request)
+    check_ride_exists(request, rideId)
 
+    ride = Ride.objects.get(rideId=rideId)
     ride_serialized = RideSerializers(ride, many=False)
-    return JsonResponse(ride_serialized.data, safe=False)
+    return render(request, 'view-ride.html', {'ride': ride_serialized.data})
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
