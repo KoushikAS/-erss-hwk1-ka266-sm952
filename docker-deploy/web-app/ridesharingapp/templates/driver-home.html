@@ -17,10 +17,46 @@ $(function(){
   $("#nav-placeholder").load("/nav/");
 });
 
+
+
+
+
+
 </script>
 <!--end of Navigation bar-->
 
 <div class="contianer p-3">
+
+    {% if request.session.driverView %}
+    {%if currentRide %}
+    <div class="card bg-light mb-3">
+        <div class="card-body">
+            <h4 class="card-subtitle mb-2 ">Your current Ride:</h4>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col">Status</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Arrival Time</th>
+                    <th scope="col">No of Passengers</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><a class="link-secondary" href="{% url 'viewride' currentRide.rideId %}">{{currentRide.status}}</a>
+                    </td>
+                    <td>{{currentRide.source}}</td>
+                    <td> {{currentRide.destination}}</td>
+                    <td>{{currentRide.destinationArrivalTimeStamp}}</td>
+                    <td> {{currentRide.availablePassengers}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
     <h2>
         Open Rides
     </h2>
@@ -29,7 +65,18 @@ $(function(){
     $(function(){
     $("#open-rides").load("/rides/view/driver/");
     });
+
+
+
+
+
     </script>
+    {% endif %}
+
+
+    {% else %}
+    <p class="lead">You are not supposed to be here. Click here to go to <a href="{% url 'home' %}">home.</a></p>
+    {% endif %}
 </div>
 
 </body>

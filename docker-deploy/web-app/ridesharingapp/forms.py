@@ -1,9 +1,8 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Driver, Ride
+from .models import Driver, Ride, Party
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.admin.widgets import AdminDateWidget
 
 
 class RegisterUserForm(UserCreationForm):
@@ -30,6 +29,12 @@ class RegisterDriverForm(ModelForm):
         fields = ['vehicle_type', 'max_passengers', 'license_no']
 
 
+class PartyForm(ModelForm):
+    class Meta:
+        model = Party
+        fields = ['passengers']
+
+
 class RideForm(ModelForm):
     passengers = forms.IntegerField(max_value=8, min_value=1)
     maxPassengers = forms.IntegerField(max_value=8, min_value=1)
@@ -37,10 +42,4 @@ class RideForm(ModelForm):
 
     class Meta:
         model = Ride
-        fields = ['source',
-                  'destination',
-                  'destinationArrivalTimeStamp',
-                  'passengers',
-                  'maxPassengers',
-                  'isSharable']
-
+        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'passengers', 'maxPassengers', 'isSharable']

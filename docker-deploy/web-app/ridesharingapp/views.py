@@ -50,13 +50,21 @@ def check_ride_exists(request, rideId):
         messages.error(request, f"Ride Id Does not exists.")
         return redirect('home')
 
+
 def get_homepage(request):
     return render(request, 'homepage.html')
 
 
 def get_driver_homepage(request):
     check_driver_view(request)
-    return render(request, 'driver-home.html')
+
+    driver = Driver.objects.get(user=request.user)
+    currentRide = None
+
+    if Ride.objects.filter(driver_id=driver.id, status=Ride.RideStatus.CONFIRMED).exists():
+        currentRide = Ride.objects.get(driver_id=driver.id, status=Ride.RideStatus.CONFIRMED)
+
+    return render(request, 'driver-home.html', {'currentRide': currentRide})
 
 
 def get_nav(request):
@@ -264,11 +272,39 @@ def view_ride(request, rideId):
     ride = Ride.objects.get(rideId=rideId)
     ride_serialized = RideSerializers(ride, many=False)
     ownerParty = Party.objects.get(id=ride.rideOwner_id)
-    if ownerParty.owner_id == request.user.id:
+
+    canConfirmRide = False
+    canEdit = False
+    canCompleteRide = False
+    canJoinRide = False
+
+    if ownerParty.owner_id == request.user.id and ride.status == Ride.RideStatus.OPEN:
         canEdit = True
+
+    # Todo Check if the ride owner or share has the driver in it.
+
+    if request.session.get('driverView'):
+
+        if ride.status == Ride.RideStatus.OPEN :
+            canConfirmRide = True
+
+        if ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id=ride.driver_id).exists():
+            canCompleteRide = True
+
+    if ride.isSharable is True and ride.status == Ride.RideStatus.OPEN and ownerParty.owner_id != request.user.id:
+        canJoinRide = True
+
+    if ride.driver:
+        driver = Driver.objects.get(id=ride.driver_id);
+        driverUser = User.objects.get(id=driver.user_id);
+        driverName = driverUser.username
     else:
-        canEdit = False
-    return render(request, 'view-ride.html', {'ride': ride_serialized.data, 'canEdit': canEdit})
+        driver = None
+        driverName = None
+
+    return render(request, 'view-ride.html',
+                  {'ride': ride_serialized.data, 'canEdit': canEdit, 'driver': driver, 'driverName': driverName,
+                   'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide, 'canJoinRide': canJoinRide})
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
@@ -282,17 +318,37 @@ def ride_searching_sharer(request):
 
 
 # Ride Complete: when driver completes the ride
-def ride_complete(request):
-    return HttpResponse("Page Under Development")
-
-
-# Ride Cnfirmed: when driver confirms the ride
-def ride_confirmed(request , rideId):
+def ride_complete(request, rideId):
     check_user_authentication(request)
     check_driver_view(request)
-    check_ride_exists(request,rideId)
+    check_ride_exists(request, rideId)
 
     ride = Ride.objects.get(rideId=rideId)
+
+    if ride.status != Ride.RideStatus.CONFIRMED:
+        messages.error(request, f"Ride Is already Completed.")
+        return redirect('driverhome')
+
+    driver = Driver.objects.get(user=request.user)
+    if ride.driver != driver:
+        messages.error(request, f"This Ride is not started by you.")
+        return redirect('driverhome')
+
+    ride.status = Ride.RideStatus.COMPLETED
+    ride.save()
+    messages.success(request, " Successfully Completed the ride!")
+    return redirect('driverhome')
+
+
+# Ride Confirmed: when driver confirms the ride
+def ride_confirmed(request, rideId):
+    check_user_authentication(request)
+    check_driver_view(request)
+    check_ride_exists(request, rideId)
+
+    ride = Ride.objects.get(rideId=rideId)
+
+    # Todo Check if the owner or rest of passengers are the driver itself. and throw an error message
 
     if ride.status != Ride.RideStatus.OPEN:
         messages.error(request, f"Ride Is already confirmed.")
@@ -308,3 +364,31 @@ def ride_confirmed(request , rideId):
     ride.save()
     messages.success(request, " Successfully Confirmed the ride!")
     return redirect('driverhome')
+
+
+# Join a sharable Ride.
+def join_ride(request, rideId):
+    check_user_authentication(request)
+    check_ride_exists(rideId)
+
+    if request.POST:
+        form = RegisterUserForm(request.POST)
+        if form.is_valid():
+            ride = Ride.objects().get(id=rideId)
+
+            if ride.availablePassengers > form.cleaned_data['passengers']:
+                messages.error(request, f"Party can only accommodate " + ride.availablePassengers + ". Please try "
+                                                                                                    "another ride!")
+                return redirect('home')
+
+            party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+            party.save()
+            ride.availablePassengers = ride.availablePassengers - form.cleaned_data['passengers']
+            ride.rideShared.add(party)
+            messages.success(request, " Successfully Joined the ride.")
+            return redirect('home')
+        else:
+            messages.error(request, f'Invalid Entry')
+    else:
+        form = RegisterUserForm()
+    return render(request, 'party-form.html', {'form': form, 'rideId': rideId})
