@@ -28,8 +28,8 @@ $(function(){
 <form method="POST" action=" ">
     {% csrf_token %}
     {{form | crispy}}
-
-    <button class="btn btn-outline-dark" type="submit">{{ pageAction }}</button>
+    <div class = "pt-4"></div>
+    <button class="btn btn-outline-dark " type="submit">Submit</button>
 </form>
 {% endblock %}
 </div>

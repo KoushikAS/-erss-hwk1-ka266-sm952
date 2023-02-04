@@ -272,6 +272,9 @@ def view_ride(request, rideId):
     ride = Ride.objects.get(rideId=rideId)
     ride_serialized = RideSerializers(ride, many=False)
     ownerParty = Party.objects.get(id=ride.rideOwner_id)
+    parties = []
+    parties.append({'ownerName': User.objects.get(id=ownerParty.owner_id).username ,'passengers': ownerParty.passengers, 'owner': True})
+
 
     canConfirmRide = False
     canEdit = False
@@ -285,7 +288,7 @@ def view_ride(request, rideId):
 
     if request.session.get('driverView'):
 
-        if ride.status == Ride.RideStatus.OPEN :
+        if ride.status == Ride.RideStatus.OPEN:
             canConfirmRide = True
 
         if ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id=ride.driver_id).exists():
@@ -295,21 +298,22 @@ def view_ride(request, rideId):
         canJoinRide = True
 
     if ride.driver:
-        driver = Driver.objects.get(id=ride.driver_id);
-        driverUser = User.objects.get(id=driver.user_id);
+        driver = Driver.objects.get(id=ride.driver_id)
+        driverUser = User.objects.get(id=driver.user_id)
         driverName = driverUser.username
     else:
         driver = None
         driverName = None
 
+    for party in ride.rideShared.all():
+        parties.append(
+            {'ownerName': User.objects.get(id=party.owner_id).username, 'passengers': party.passengers,
+             'owner': False})
+
     return render(request, 'view-ride.html',
                   {'ride': ride_serialized.data, 'canEdit': canEdit, 'driver': driver, 'driverName': driverName,
-                   'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide, 'canJoinRide': canJoinRide})
+                   'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide, 'canJoinRide': canJoinRide, 'parties': parties})
 
-
-# Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver
-def ride_searching_driver(request):
-    return HttpResponse("Page Under Development")
 
 
 # Ride Searching Sharer: Similar to Ride Selection but with filters and open rides driver
@@ -369,26 +373,27 @@ def ride_confirmed(request, rideId):
 # Join a sharable Ride.
 def join_ride(request, rideId):
     check_user_authentication(request)
-    check_ride_exists(rideId)
+    check_ride_exists(request, rideId)
 
     if request.POST:
-        form = RegisterUserForm(request.POST)
+        form = PartyForm(request.POST)
         if form.is_valid():
-            ride = Ride.objects().get(id=rideId)
+            ride = Ride.objects.get(rideId=rideId)
 
-            if ride.availablePassengers > form.cleaned_data['passengers']:
-                messages.error(request, f"Party can only accommodate " + ride.availablePassengers + ". Please try "
-                                                                                                    "another ride!")
+            if ride.availablePassengers <= form.cleaned_data['passengers']:
+                messages.error(request, f"Party can only accommodate " + str(ride.availablePassengers) + ". Please try "
+                                                                                                         "another ride!")
                 return redirect('home')
 
             party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
             party.save()
             ride.availablePassengers = ride.availablePassengers - form.cleaned_data['passengers']
             ride.rideShared.add(party)
+            ride.save()
             messages.success(request, " Successfully Joined the ride.")
             return redirect('home')
         else:
             messages.error(request, f'Invalid Entry')
     else:
-        form = RegisterUserForm()
+        form = PartyForm()
     return render(request, 'party-form.html', {'form': form, 'rideId': rideId})
