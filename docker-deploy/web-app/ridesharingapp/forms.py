@@ -31,11 +31,16 @@ class RegisterDriverForm(ModelForm):
 
 
 class RideForm(ModelForm):
-    passengers = forms.IntegerField(max_value=4, min_value=1)
+    passengers = forms.IntegerField(max_value=8, min_value=1)
+    maxPassengers = forms.IntegerField(max_value=8, min_value=1)
     destinationArrivalTimeStamp = forms.DateTimeField()
 
     class Meta:
         model = Ride
-        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'maxPassengers', 'isSharable']
-
+        fields = ['source',
+                  'destination',
+                  'destinationArrivalTimeStamp',
+                  'passengers',
+                  'maxPassengers',
+                  'isSharable']
 

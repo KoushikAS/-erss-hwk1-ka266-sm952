@@ -49,4 +49,4 @@ class Ride(models.Model):
                                         validators=[MaxValueValidator(8), MinValueValidator(1)])
 
     def isRideEditable(self):
-        return self.RideStatus == self.RideStatus.OPEN
+        return self.status == self.RideStatus.OPEN
