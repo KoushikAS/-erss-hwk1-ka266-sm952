@@ -21,13 +21,18 @@ $(function(){
 
 
 
+
+
+
+
+
 </script>
 <!--end of Navigation bar-->
 
-<h2>
-    View Ride
-</h2>
 <div class="contianer p-3">
+    <h2>
+        View Ride
+    </h2>
     <table class="table">
         <tbody>
         <tr>
@@ -53,7 +58,13 @@ $(function(){
         </tbody>
     </table>
     <p class="lead">
+        {% if canEdit %}
         <a class="btn btn-outline-dark " href="{% url 'editride' ride.rideId %}" role="button">Edit Ride</a>
+        {% else %}
+        {% if request.session.driverView %}
+        <a class="btn btn-outline-dark " href="{% url 'confirmride' ride.rideId %}" role="button">Confirm Ride</a>
+        {% endif %}
+        {% endif %}
     </p>
 </div>
 

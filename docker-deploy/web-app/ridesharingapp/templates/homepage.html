@@ -16,15 +16,20 @@
 $(function(){
   $("#nav-placeholder").load("/nav/");
 });
+
 </script>
 <!--end of Navigation bar-->
 <div class="p-3">
     {% if user.is_authenticated %}
+    <h2>
+        Upcoming Rides
+    </h2>
     <div id="own-rides"></div>
     <script>
     $(function(){
     $("#own-rides").load("/rides/view/");
     });
+
     </script>
     {% else %}
     <div class="jumbotron">

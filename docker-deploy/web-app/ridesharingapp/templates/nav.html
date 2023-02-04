@@ -8,6 +8,7 @@
         <li><a class="nav-link" href="{% url 'edituser' %}">Edit User Details</a></li>
         <li><a class="nav-link" href="{% url 'createride' %}">Create Ride</a></li>
         {% if request.session.driverView %}
+        <li><a class="nav-link" href="{% url 'driverhome'%}">Driver Home</a></li>
         <li><a class="nav-link" href="{% url 'editdriver'%}">Edit Driver Detail</a></li>
         <li><a class="nav-link" href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a></li>
         {% else %}
