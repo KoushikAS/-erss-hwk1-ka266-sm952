@@ -246,7 +246,16 @@ def view_ride(request, rideId):
         canEdit = True
     else:
         canEdit = False
-    return render(request, 'view-ride.html', {'ride': ride_serialized.data, 'canEdit': canEdit})
+
+    if ride.driver:
+        driver = Driver.objects.get(id= ride.driver_id);
+        driverUser = User.objects.get(id = driver.user_id);
+        driverName = driverUser.username
+    else:
+        driver = None
+        driverName = None
+
+    return render(request, 'view-ride.html', {'ride': ride_serialized.data, 'canEdit': canEdit, 'driver': driver, 'driverName': driverName})
 
 
 # Ride Searching Driver: Similar to Ride Selection but with filters and open rides driver

@@ -26,6 +26,9 @@ $(function(){
 
 
 
+
+
+
 </script>
 <!--end of Navigation bar-->
 
@@ -57,6 +60,32 @@ $(function(){
         </tr>
         </tbody>
     </table>
+
+    {% if driver %}
+    <div class="card bg-light mb-3">
+        <div class="card-body">
+            <h3 class="card-title text-center">Driver</h3>
+            <h4 class="card-subtitle mb-2 text-center ">{{driverName}}</h4>
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col">Vehicle Type</th>
+                    <th scope="col">Max Passengers</th>
+                    <th scope="col">License No</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ driver.vehicle_type }}</td>
+                    <td>{{ driver.max_passengers }}</td>
+                    <td>@{{ driver.license_no }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
     <p class="lead">
         {% if canEdit %}
         <a class="btn btn-outline-dark " href="{% url 'editride' ride.rideId %}" role="button">Edit Ride</a>
