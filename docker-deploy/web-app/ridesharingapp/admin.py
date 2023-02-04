@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ride
+from .models import *
 
 
 # Register your models here.
@@ -9,3 +9,8 @@ from .models import Ride
 class Ride(admin.ModelAdmin):
     list_display = ['rideId', 'driver', 'rideOwner', 'isSharable', 'source', 'destination',
                     'destinationArrivalTimeStamp', 'status']
+
+
+@admin.register(Party)
+class Party(admin.ModelAdmin):
+    list_display = ['owner', 'passengers']

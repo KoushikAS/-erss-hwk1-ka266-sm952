@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
 
-
 class RegisterUserForm(UserCreationForm):
     first_name = forms.CharField(max_length=101)
     last_name = forms.CharField(max_length=101)
@@ -37,9 +36,10 @@ class PartyForm(ModelForm):
 
 
 class RideForm(ModelForm):
-    passengers = forms.IntegerField(max_value=4, min_value=1)
+    passengers = forms.IntegerField(max_value=8, min_value=1)
+    maxPassengers = forms.IntegerField(max_value=8, min_value=1)
     destinationArrivalTimeStamp = forms.DateTimeField()
 
     class Meta:
         model = Ride
-        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'maxPassengers', 'isSharable']
+        fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'passengers', 'maxPassengers', 'isSharable']
