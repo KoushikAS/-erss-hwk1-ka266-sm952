@@ -103,6 +103,9 @@ $(function(){
         {% if canJoinRide %}
         <a class="btn btn-outline-dark " href="{% url 'completeride' ride.rideId %}" role="button">Join Ride</a>
         {% endif %}
+        {% if canEdit %}
+        <a class="btn btn-outline-danger " href="{% url 'deleteride' ride.rideId %}" role="button">Delete Ride</a>
+        {% endif %}
     </p>
 </div>
 

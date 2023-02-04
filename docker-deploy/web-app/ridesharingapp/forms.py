@@ -43,3 +43,10 @@ class RideForm(ModelForm):
     class Meta:
         model = Ride
         fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'passengers', 'maxPassengers', 'isSharable']
+
+
+class OpenRidesForm(forms.Form):
+    destination = forms.CharField(max_length=500)
+    passengers = forms.IntegerField(max_value=8, min_value=1)
+    earliestArrivalTime = forms.DateTimeField()
+    latestArrivalTime = forms.DateTimeField()

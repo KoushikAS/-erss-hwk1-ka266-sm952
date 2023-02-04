@@ -269,6 +269,17 @@ def edit_ride(request, rideId):
     return render(request, 'edit-ride.html', {'form': edit_form})
 
 
+def is_driver_in_ride(userId, ride):
+    if ride.rideOwner.owner_id == userId:
+        return True
+    else:
+        parties = ride.rideShared.all()
+        for party in parties:
+            if party.owner_id == userId:
+                return True
+        return False
+
+
 # Ride Status Viewing: View Individual Ride
 def view_ride(request, rideId):
     check_user_authentication(request)
@@ -285,9 +296,7 @@ def view_ride(request, rideId):
     if ownerParty.owner_id == request.user.id and ride.status == Ride.RideStatus.OPEN:
         canEdit = True
 
-    # Todo Check if the ride owner or share has the driver in it.
-
-    if request.session.get('driverView'):
+    if request.session.get('driverView') and not is_driver_in_ride(request.user.id, ride):
 
         if ride.status == Ride.RideStatus.OPEN :
             canConfirmRide = True
@@ -352,7 +361,9 @@ def ride_confirmed(request, rideId):
 
     ride = Ride.objects.get(rideId=rideId)
 
-    # Todo Check if the owner or rest of passengers are the driver itself. and throw an error message
+    if is_driver_in_ride(request.user.i, ride):
+        messages.error(request, f"Not authorized to confirm your own ride!")
+        return redirect('home')
 
     if ride.status != Ride.RideStatus.OPEN:
         messages.error(request, f"Ride Is already confirmed.")
@@ -396,3 +407,46 @@ def join_ride(request, rideId):
     else:
         form = RegisterUserForm()
     return render(request, 'party-form.html', {'form': form, 'rideId': rideId})
+
+
+def open_rides_sharer(request):
+    check_user_authentication(request)
+    canReset = False
+    form = OpenRidesForm()
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).all()
+    if request.POST:
+        if 'reset_btn' in request.POST:
+            rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).all()
+            canReset = False
+        elif 'search_btn' in request.POST:
+            form = OpenRidesForm(request.POST)
+            if form.is_valid():
+                rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                            isSharable=True,
+                                            destination__startswith=form.cleaned_data['destination'],
+                                            destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
+                                            destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
+                                            availablePassengers__gte=form.cleaned_data['passengers']) \
+                                    .order_by('destinationArrivalTimeStamp')
+            else:
+                messages.error(request, f'Invalid Entry')
+            canReset = True
+    rides_serialized = RideSerializers(rides, many=True)
+    return render(request, 'view-open-rides.html', {'rides': rides_serialized.data, 'form': form, 'canReset': canReset})
+
+
+def delete_ride(request, rideId):
+    check_user_authentication(request)
+    try:
+        ride = Ride.objects.get(rideId=rideId)
+    except Ride.DoesNotExist:
+        messages.error(request, f"Ride not found!")
+    if request.user.id != ride.rideOwner_id:
+        messages.error(request, f"Not authorized!")
+    else:
+        if ride.isRideEditable():
+            ride.rideOwner.delete()
+            ride.delete()
+        else:
+            messages.error(request, f"Ride Is already confirmed.!")
+    return redirect('home')
