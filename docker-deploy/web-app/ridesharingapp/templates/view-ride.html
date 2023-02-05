@@ -29,6 +29,10 @@ $(function(){
 
 
 
+
+
+
+
 </script>
 <!--end of Navigation bar-->
 
@@ -94,6 +98,31 @@ $(function(){
     </div>
     {% endif %}
 
+    <h3 class="card-title text-center" >Passengers</h3>
+    <div class="pt-4"></div>
+    <div class="container">
+        <div class="row">
+            {% for party in parties %}
+            <div class="col-md-2 d-flex align-items-stretch">
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">{{party.ownerName}}</h5>
+                        {% if party.owner %}
+                        <h7 class="card-subtitle text-center text-muted ">Ride Owner</h7>
+                        {% else %}
+                        <h7 class="card-subtitle text-center text-muted ">Ride Sharer</h7>
+                        {% endif %}
+                        <br>
+                        <h7 >No of passengers: {{party.passengers}}</h7>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="pt-4"></div>
     <p class="lead">
         {% if canEdit %}
         <a class="btn btn-outline-dark " href="{% url 'editride' ride.rideId %}" role="button">Edit Ride</a>
@@ -105,7 +134,7 @@ $(function(){
         <a class="btn btn-outline-dark " href="{% url 'completeride' ride.rideId %}" role="button">Complete Ride</a>
         {% endif %}
         {% if canJoinRide %}
-        <a class="btn btn-outline-dark " href="{% url 'completeride' ride.rideId %}" role="button">Join Ride</a>
+        <a class="btn btn-outline-dark " href="{% url 'joinride' ride.rideId %}" role="button">Join Ride</a>
         {% endif %}
         {% if canEdit %}
         <a class="btn btn-outline-danger " href="{% url 'deleteride' ride.rideId %}" role="button">Delete Ride</a>

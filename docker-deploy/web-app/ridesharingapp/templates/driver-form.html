@@ -16,22 +16,23 @@
 $(function(){
   $("#nav-placeholder").load("/nav/");
 });
+
 </script>
 <!--end of Navigation bar-->
 
 <div class="p-3">
-{% load crispy_forms_tags %}
+    {% load crispy_forms_tags %}
 
-{% block content %}
-<h2>{{ pageAction }}</h2>
+    {% block content %}
+    <h2>{{ pageAction }}</h2>
 
-<form method="POST" action=" ">
-    {% csrf_token %}
-    {{form | crispy}}
-
-    <button class="btn btn-outline-dark" type="submit">{{ pageAction }}</button>
-</form>
-{% endblock %}
+    <form method="POST" action=" ">
+        {% csrf_token %}
+        {{form | crispy}}
+        <div class="pt-4"></div>
+        <button class="btn btn-outline-dark " type="submit">{{ pageAction }}</button>
+    </form>
+    {% endblock %}
 </div>
 
 </body>

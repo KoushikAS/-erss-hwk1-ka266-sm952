@@ -18,6 +18,7 @@ urlpatterns = [
     path('rides/edit/<int:rideId>', views.edit_ride, name='editride'),
     path('rides/delete/<int:rideId>', views.delete_ride, name='deleteride'),
     path('rides/open/driver/', views.create_ride, name='openridesdriver'),
+    path('rides/open/join/<int:rideId>', views.join_ride, name='joinride'),
     path('rides/open/sharer/', views.open_rides_sharer, name='openridessharer'),
     path('driver/home/', views.get_driver_homepage, name='driverhome'),
     path('driver/ride/confirmed/<int:rideId>', views.ride_confirmed, name='confirmride'),
