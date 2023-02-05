@@ -221,7 +221,8 @@ def create_ride(request):
                             availablePassengers=availableSeats,
                             rideOwner=party,
                             isSharable=form.cleaned_data['isSharable'],
-                            vehicleType=form.cleaned_data['vehicleType'])
+                            vehicleType=form.cleaned_data['vehicleType'],
+                            specialRequests=form.cleaned_data['specialRequests'])
                 ride.save()
                 return redirect('viewride', rideId=ride.rideId)
         else:
@@ -247,7 +248,8 @@ def edit_ride(request, rideId):
             'destinationArrivalTimeStamp': ride.destinationArrivalTimeStamp,
             'passengers': ride.rideOwner.passengers,
             'vehicleType': ride.vehicleType,
-            'isSharable': ride.isSharable
+            'isSharable': ride.isSharable,
+            'specialRequests': ride.specialRequests,
         }
         edit_form = RideForm(initial=data)
         if request.POST:
@@ -274,6 +276,7 @@ def edit_ride(request, rideId):
                     ride.rideOwner = party
                     ride.isSharable = form.cleaned_data['isSharable']
                     ride.vehicleType = form.cleaned_data['vehicleType']
+                    ride.specialRequests = form.cleaned_data['specialRequests']
                     ride.save()
                     return redirect('viewride', rideId=ride.rideId)
             else:
