@@ -1,5 +1,6 @@
-Authentication of User. What if Hacker gets to know user Id, Ride Id
-What happens if 2 drivers accept the Ride at the same time
-What happens if driver gets deleted after accepting ride. According to the model Ride also gets delted. So no graceful of indicating to Owner and other user
-Should Clean up Rides after the time has expired
-Should understand CSRf and properly operate on it
+Right now we are storing user object in the session. What if Hacker gets to know this.
+What happens if 2 drivers accept the Ride at the same time. Or 2 people join the party at the same time. Should handle concurrency.
+What happens if driver gets deleted after accepting ride. Should gracefully indicate all parties when this happens.
+Currently, Rides stay in the DB forever. Should Clean up Rides after the time has expired
+Currently made sure that CSRF is open for all. Should understand CSRf to properly restrict it.
+App password for email verification is present in the settings.yml (security breach) (dummy email but still should handle this better)

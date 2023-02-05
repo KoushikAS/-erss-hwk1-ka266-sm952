@@ -8,30 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
-
-
-# Just for testing purpose
-def get_rides(request):
-    # Should Do User Validation
-    rides = Ride.objects.all()
-    rides_serialized = RideSerializers(rides, many=True)
-    return JsonResponse(rides_serialized.data, safe=False)
-
-
-# Just for Testing purpose
-def get_drivers(request):
-    # Should Do User Validation
-    drivers = Driver.objects.all()
-    drivers_serialized = DriverSerializers(drivers, many=True)
-    return JsonResponse(drivers_serialized.data, safe=False)
-
-
-# Just for Testing purpose
-def get_users(request):
-    # Should Do User Validation
-    users = User.objects.all()
-    users_serialized = UserSerializers(users, many=True)
-    return JsonResponse(users_serialized.data, safe=False)
+from django.core.mail import send_mail
 
 
 def check_user_authentication(request):
@@ -52,6 +29,15 @@ def check_ride_exists(request, rideId):
         return redirect('home')
 
 
+def view_user(request):
+    check_user_authentication(request)
+    if request.session.get('driverView'):
+        driver = Driver.objects.get(user=request.user)
+    else:
+        driver = None
+    return render(request, 'view-user.html', {'driver': driver})
+
+
 def get_homepage(request):
     return render(request, 'homepage.html')
 
@@ -66,7 +52,6 @@ def get_driver_homepage(request):
 
     if len(currentRides) == 0:
         currentRides = None
-
 
     return render(request, 'driver-home.html', {'currentRides': currentRides})
 
@@ -388,6 +373,11 @@ def ride_complete(request, rideId):
 
     ride.status = Ride.RideStatus.COMPLETED
     ride.save()
+
+    ownerParty = Party.objects.get(id=ride.rideOwner_id)
+
+    send_mail('Ride Complete', 'Your ride is completed. Looking to serve you again.', 'ece568project1@gmail.com',
+              [User.objects.get(id=ownerParty.owner_id).email], fail_silently=False)
     messages.success(request, " Successfully Completed the ride!")
     return redirect('driverhome')
 
