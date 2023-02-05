@@ -187,7 +187,7 @@ def delete_driver(request):
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):
     check_user_authentication(request)
-    rides = Ride.objects.filter(rideOwner__owner=request.user.id).all()
+    rides = Ride.objects.filter(Q(rideOwner__owner=request.user.id) | Q(rideShared__owner=request.user.id)).all()
     rides_serialized = RideSerializers(rides, many=True)
     return render(request, 'view-rides.html', {'rides': rides_serialized.data})
 
