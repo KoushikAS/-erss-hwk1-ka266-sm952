@@ -8,10 +8,12 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
+from django.core.mail import send_mail
 
 
 # Just for testing purpose
 def get_rides(request):
+    send_mail('Test', 'This is a test', 'ece568project1@gmail.com', ['ka266@duke.edu'],fail_silently=False)
     # Should Do User Validation
     rides = Ride.objects.all()
     rides_serialized = RideSerializers(rides, many=True)
@@ -388,6 +390,10 @@ def ride_complete(request, rideId):
 
     ride.status = Ride.RideStatus.COMPLETED
     ride.save()
+
+    ownerParty = Party.objects.get(id=ride.rideOwner_id)
+
+    send_mail('Ride Complete', 'Your ride is completed. Looking to serve you again.', 'ece568project1@gmail.com', [User.objects.get(id=ownerParty.owner_id).email], fail_silently=False)
     messages.success(request, " Successfully Completed the ride!")
     return redirect('driverhome')
 
