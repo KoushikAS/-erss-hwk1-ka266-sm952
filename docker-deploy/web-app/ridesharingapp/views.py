@@ -392,7 +392,7 @@ def ride_confirmed(request, rideId):
         messages.error(request, f"This Ride is not compatible with your car.")
         return redirect('driverhome')
 
-    if ride.specialRequests is not None and ride.specialRequests != driver.special_info:
+    if ride.specialRequests.strip() and ride.specialRequests != driver.special_info:
         messages.error(request, f"This Ride is not compatible with your car based on special requests!")
         return redirect('driverhome')
 
