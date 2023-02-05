@@ -33,6 +33,7 @@ $(function(){
 
 
 
+
 </script>
 <!--end of Navigation bar-->
 
@@ -98,7 +99,7 @@ $(function(){
     </div>
     {% endif %}
 
-    <h3 class="card-title text-center" >Passengers</h3>
+    <h3 class="card-title text-center">Passengers</h3>
     <div class="pt-4"></div>
     <div class="container">
         <div class="row">
@@ -113,7 +114,7 @@ $(function(){
                         <h7 class="card-subtitle text-center text-muted ">Ride Sharer</h7>
                         {% endif %}
                         <br>
-                        <h7 >No of passengers: {{party.passengers}}</h7>
+                        <h7>No of passengers: {{party.passengers}}</h7>
                     </div>
                 </div>
             </div>
@@ -126,6 +127,7 @@ $(function(){
     <p class="lead">
         {% if canEdit %}
         <a class="btn btn-outline-dark " href="{% url 'editride' ride.rideId %}" role="button">Edit Ride</a>
+        <a class="btn btn-outline-danger " href="{% url 'deleteride' ride.rideId %}" role="button">Delete Ride</a>
         {% endif %}
         {% if canConfirmRide %}
         <a class="btn btn-outline-dark " href="{% url 'confirmride' ride.rideId %}" role="button">Confirm Ride</a>
@@ -136,8 +138,9 @@ $(function(){
         {% if canJoinRide %}
         <a class="btn btn-outline-dark " href="{% url 'joinride' ride.rideId %}" role="button">Join Ride</a>
         {% endif %}
-        {% if canEdit %}
-        <a class="btn btn-outline-danger " href="{% url 'deleteride' ride.rideId %}" role="button">Delete Ride</a>
+        {% if canEditParty %}
+        <a class="btn btn-outline-dark " href="{% url 'editParty' ride.rideId %}" role="button">Edit Party</a>
+        <a class="btn btn-outline-danger " href="{% url 'deleteParty' ride.rideId %}" role="button">Delete Party</a>
         {% endif %}
     </p>
 </div>
