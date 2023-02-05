@@ -28,7 +28,7 @@ $(function(){
 <div class="contianer p-3">
 
     {% if request.session.driverView %}
-    {%if currentRide %}
+    {%if currentRides %}
     <div class="card bg-light mb-3">
         <div class="card-body">
             <h4 class="card-subtitle mb-2 ">Your current Ride:</h4>
@@ -39,24 +39,23 @@ $(function(){
                     <th scope="col">Source</th>
                     <th scope="col">Destination</th>
                     <th scope="col">Arrival Time</th>
-                    <th scope="col">No of Passengers</th>
                 </tr>
                 </thead>
                 <tbody>
+                {% for ride in currentRides %}
                 <tr>
-                    <td><a class="link-secondary" href="{% url 'viewride' currentRide.rideId %}">{{currentRide.status}}</a>
+                    <td><a class="link-secondary" href="{% url 'viewride' ride.rideId %}">{{ride.status}}</a>
                     </td>
-                    <td>{{currentRide.source}}</td>
-                    <td> {{currentRide.destination}}</td>
-                    <td>{{currentRide.destinationArrivalTimeStamp}}</td>
-                    <td> {{currentRide.availablePassengers}}</td>
+                    <td>{{ride.source}}</td>
+                    <td> {{ride.destination}}</td>
+                    <td>{{ride.destinationArrivalTimeStamp}}</td>
                 </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
-
-    {% else %}
+        {% endif %}
     <h2>
         Open Rides
     </h2>
@@ -71,7 +70,7 @@ $(function(){
 
 
     </script>
-    {% endif %}
+
 
 
     {% else %}
