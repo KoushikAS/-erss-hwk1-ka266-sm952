@@ -15,8 +15,6 @@ class Driver(models.Model):
     vehicle_type = models.CharField(max_length=15,
                                     choices=VehicleType.choices,
                                     default=VehicleType.FOUR_SEATER, )
-    max_passengers = models.IntegerField(default=4,
-                                         validators=[MaxValueValidator(8), MinValueValidator(1)])
     license_no = models.CharField(max_length=500, blank=False, default=None)
     special_info = models.TextField(blank=True, null=True, default=None)
 
