@@ -7,6 +7,7 @@ from .forms import *
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
 
 
 # Just for testing purpose
@@ -186,7 +187,7 @@ def delete_driver(request):
 # Ride Selection: View Rides accessible to the user
 def view_rides(request):
     check_user_authentication(request)
-    rides = Ride.objects.filter(rideOwner__owner=request.user.id).all()
+    rides = Ride.objects.filter(Q(rideOwner__owner=request.user.id) | Q(rideShared__owner=request.user.id)).all()
     rides_serialized = RideSerializers(rides, many=True)
     return render(request, 'view-rides.html', {'rides': rides_serialized.data})
 
@@ -195,7 +196,9 @@ def view_rides(request):
 def view_rides_driver(request):
     check_user_authentication(request)
     check_driver_view(request)
-    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).all()
+    driver = Driver.objects.get(user=request.user)
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).filter(Q(vehicleType=None) | Q(vehicleType=driver.vehicle_type))\
+        .filter(Q(specialRequests=None) | Q(specialRequests=driver.special_info)).all()
     rides_serialized = RideSerializers(rides, many=True)
     return render(request, 'view-rides.html', {'rides': rides_serialized.data})
 
@@ -203,8 +206,9 @@ def view_rides_driver(request):
 # Ride Requesting
 def create_ride(request):
     check_user_authentication(request)
-    form = RideForm(request.POST)
+    form = RideForm()
     if request.POST:
+        form = RideForm(request.POST)
         if form.is_valid():
             party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
             party.save()
@@ -215,6 +219,10 @@ def create_ride(request):
             if availableSeats < 0:
                 messages.error(request, 'Invalid number of passengers in the form!')
             else:
+                if form.cleaned_data['specialRequests'].strip() == '':
+                    specialRequests = None
+                else:
+                    specialRequests=form.cleaned_data['specialRequests']
                 ride = Ride(source=form.cleaned_data['source'],
                             destination=form.cleaned_data['destination'],
                             destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
@@ -222,7 +230,7 @@ def create_ride(request):
                             rideOwner=party,
                             isSharable=form.cleaned_data['isSharable'],
                             vehicleType=form.cleaned_data['vehicleType'],
-                            specialRequests=form.cleaned_data['specialRequests'])
+                            specialRequests=specialRequests)
                 ride.save()
                 return redirect('viewride', rideId=ride.rideId)
         else:
@@ -267,6 +275,10 @@ def edit_ride(request, rideId):
                 if availableSeats < 0:
                     messages.error(request, 'Invalid number of passengers in the form!')
                 else:
+                    if form.cleaned_data['specialRequests'].strip() == '':
+                        specialRequests = None
+                    else:
+                        specialRequests = form.cleaned_data['specialRequests']
                     party.passengers = form.cleaned_data['passengers']
                     party.save()
                     ride.source = form.cleaned_data['source']
@@ -276,7 +288,7 @@ def edit_ride(request, rideId):
                     ride.rideOwner = party
                     ride.isSharable = form.cleaned_data['isSharable']
                     ride.vehicleType = form.cleaned_data['vehicleType']
-                    ride.specialRequests = form.cleaned_data['specialRequests']
+                    ride.specialRequests = specialRequests
                     ride.save()
                     return redirect('viewride', rideId=ride.rideId)
             else:
@@ -499,21 +511,38 @@ def open_rides_sharer(request):
     check_user_authentication(request)
     canReset = False
     form = OpenRidesForm()
-    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).all()
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).order_by('destinationArrivalTimeStamp').all()
     if request.POST:
         if 'reset_btn' in request.POST:
-            rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).all()
+            rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).order_by('destinationArrivalTimeStamp').all()
             canReset = False
         elif 'search_btn' in request.POST:
             form = OpenRidesForm(request.POST)
             if form.is_valid():
-                rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
-                                            isSharable=True,
-                                            destination__startswith=form.cleaned_data['destination'],
-                                            destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
-                                            destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
-                                            availablePassengers__gte=form.cleaned_data['passengers']) \
-                    .order_by('destinationArrivalTimeStamp')
+                if form.cleaned_data['earliestArrivalTime'] is not None and form.cleaned_data['latestArrivalTime'] is not None:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                                isSharable=True,
+                                                destination__startswith='' if form.cleaned_data['destination'] is None else form.cleaned_data['destination'],
+                                                destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
+                                                destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
+                                                availablePassengers__gte=1 if form.cleaned_data['passengers'] is None else form.cleaned_data['passengers']) \
+                                        .order_by('destinationArrivalTimeStamp')
+                elif form.cleaned_data['earliestArrivalTime'] is not None:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                                isSharable=True,
+                                                destination__startswith='' if form.cleaned_data['destination'] is None else form.cleaned_data['destination'],
+                                                destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
+                                                availablePassengers__gte=1 if form.cleaned_data['passengers'] is None else form.cleaned_data['passengers']) \
+                                        .order_by('destinationArrivalTimeStamp')
+                elif form.cleaned_data['latestArrivalTime'] is not None:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                                isSharable=True,
+                                                destination__startswith='' if form.cleaned_data['destination'] is None else form.cleaned_data['destination'],
+                                                destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
+                                                availablePassengers__gte=1 if form.cleaned_data['passengers'] is None else form.cleaned_data['passengers']) \
+                                        .order_by('destinationArrivalTimeStamp')
+                else:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).order_by('destinationArrivalTimeStamp').all()
             else:
                 messages.error(request, f'Invalid Entry')
             canReset = True
@@ -532,6 +561,9 @@ def delete_ride(request, rideId):
     else:
         if ride.isRideEditable():
             ride.rideOwner.delete()
+            parties = ride.rideShared.all()
+            for party in parties:
+                party.delete()
             ride.delete()
         else:
             messages.error(request, f"Ride Is already confirmed.!")
