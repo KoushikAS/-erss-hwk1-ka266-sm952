@@ -37,16 +37,18 @@ class PartyForm(ModelForm):
 
 class RideForm(ModelForm):
     passengers = forms.IntegerField(max_value=6, min_value=1)
-    destinationArrivalTimeStamp = forms.DateTimeField()
+    destinationArrivalTimeStamp = forms.DateTimeField(label='Destination Arrival Time')
 
     class Meta:
         model = Ride
         fields = ['source', 'destination', 'destinationArrivalTimeStamp', 'passengers', 'vehicleType', 'isSharable',
                   'specialRequests']
+        labels = {'vehicleType': 'Vehicle Type', 'isSharable': 'Willing to share?',
+                  'specialRequests': 'Any special requests?', }
 
 
 class OpenRidesForm(forms.Form):
     destination = forms.CharField(max_length=500, required=False)
     passengers = forms.IntegerField(max_value=6, min_value=1, required=False)
-    earliestArrivalTime = forms.DateTimeField(required=False)
-    latestArrivalTime = forms.DateTimeField(required=False)
+    earliestArrivalTime = forms.DateTimeField(label='Earliest Arrival Time', required=False)
+    latestArrivalTime = forms.DateTimeField(label='Latest Arrival Time', required=False)

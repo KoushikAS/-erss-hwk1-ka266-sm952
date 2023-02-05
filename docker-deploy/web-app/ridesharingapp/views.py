@@ -205,8 +205,9 @@ def view_rides_driver(request):
 # Ride Requesting
 def create_ride(request):
     check_user_authentication(request)
-    form = RideForm(request.POST)
+    form = RideForm()
     if request.POST:
+        form = RideForm(request.POST)
         if form.is_valid():
             party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
             party.save()
@@ -217,6 +218,10 @@ def create_ride(request):
             if availableSeats < 0:
                 messages.error(request, 'Invalid number of passengers in the form!')
             else:
+                if form.cleaned_data['specialRequests'].strip() is '':
+                    specialRequests = None
+                else:
+                    specialRequests=form.cleaned_data['specialRequests']
                 ride = Ride(source=form.cleaned_data['source'],
                             destination=form.cleaned_data['destination'],
                             destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
@@ -224,7 +229,7 @@ def create_ride(request):
                             rideOwner=party,
                             isSharable=form.cleaned_data['isSharable'],
                             vehicleType=form.cleaned_data['vehicleType'],
-                            specialRequests=form.cleaned_data['specialRequests'])
+                            specialRequests=specialRequests)
                 ride.save()
                 return redirect('viewride', rideId=ride.rideId)
         else:
@@ -269,6 +274,10 @@ def edit_ride(request, rideId):
                 if availableSeats < 0:
                     messages.error(request, 'Invalid number of passengers in the form!')
                 else:
+                    if form.cleaned_data['specialRequests'].strip() is '':
+                        specialRequests = None
+                    else:
+                        specialRequests = form.cleaned_data['specialRequests']
                     party.passengers = form.cleaned_data['passengers']
                     party.save()
                     ride.source = form.cleaned_data['source']
@@ -278,7 +287,7 @@ def edit_ride(request, rideId):
                     ride.rideOwner = party
                     ride.isSharable = form.cleaned_data['isSharable']
                     ride.vehicleType = form.cleaned_data['vehicleType']
-                    ride.specialRequests = form.cleaned_data['specialRequests']
+                    ride.specialRequests = specialRequests
                     ride.save()
                     return redirect('viewride', rideId=ride.rideId)
             else:
