@@ -26,7 +26,8 @@ class LoginUserForm(ModelForm):
 class RegisterDriverForm(ModelForm):
     class Meta:
         model = Driver
-        fields = ['vehicle_type', 'max_passengers', 'license_no']
+        fields = ['vehicle_type', 'license_no', 'special_info']
+        labels = {'vehicle_type': 'Vehicle Type', 'license_no': 'License Number', 'special_info': 'Special Vehicle Information'}
 
 
 class PartyForm(ModelForm):
