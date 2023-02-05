@@ -7,6 +7,7 @@ from .forms import *
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
+from django.db.models import Q
 
 
 # Just for testing purpose
@@ -195,7 +196,8 @@ def view_rides(request):
 def view_rides_driver(request):
     check_user_authentication(request)
     check_driver_view(request)
-    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).all()
+    driver = Driver.objects.get(user=request.user)
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).filter(Q(vehicleType=None) | Q(vehicleType=driver.vehicle_type)).all()
     rides_serialized = RideSerializers(rides, many=True)
     return render(request, 'view-rides.html', {'rides': rides_serialized.data})
 
