@@ -11,30 +11,6 @@ from django.db.models import Q
 from django.core.mail import send_mail
 
 
-# Just for testing purpose
-def get_rides(request):
-    send_mail('Test', 'This is a test', 'ece568project1@gmail.com', ['ka266@duke.edu'],fail_silently=False)
-    # Should Do User Validation
-    rides = Ride.objects.all()
-    rides_serialized = RideSerializers(rides, many=True)
-    return JsonResponse(rides_serialized.data, safe=False)
-
-
-# Just for Testing purpose
-def get_drivers(request):
-    # Should Do User Validation
-    drivers = Driver.objects.all()
-    drivers_serialized = DriverSerializers(drivers, many=True)
-    return JsonResponse(drivers_serialized.data, safe=False)
-
-
-# Just for Testing purpose
-def get_users(request):
-    # Should Do User Validation
-    users = User.objects.all()
-    users_serialized = UserSerializers(users, many=True)
-    return JsonResponse(users_serialized.data, safe=False)
-
 
 def check_user_authentication(request):
     if request.user.is_authenticated is False:
