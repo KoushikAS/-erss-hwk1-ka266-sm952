@@ -5,11 +5,12 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
 
-class Driver(models.Model):
-    class VehicleType(models.TextChoices):
-        FOUR_SEATER = 'FOUR_SEATER', _('4 Seats')
-        SIX_SEATER = 'SIX_SEATER', _('6 Seats')
+class VehicleType(models.TextChoices):
+    FOUR_SEATER = 'FOUR_SEATER', _('4 Seats')
+    SIX_SEATER = 'SIX_SEATER', _('6 Seats')
 
+
+class Driver(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=15,
                                     choices=VehicleType.choices,
@@ -17,6 +18,7 @@ class Driver(models.Model):
     max_passengers = models.IntegerField(default=4,
                                          validators=[MaxValueValidator(8), MinValueValidator(1)])
     license_no = models.CharField(max_length=500, blank=False, default=None)
+    special_info = models.TextField(blank=True, null=True)
 
 
 class Party(models.Model):
@@ -43,10 +45,9 @@ class Ride(models.Model):
         choices=RideStatus.choices,
         default=RideStatus.OPEN,
     )
-    maxPassengers = models.IntegerField(default=4,
-                                        validators=[MaxValueValidator(8), MinValueValidator(1)])
     availablePassengers = models.IntegerField(default=4,
                                         validators=[MaxValueValidator(8), MinValueValidator(1)])
-
+    vehicleType = models.CharField(max_length=15, choices=VehicleType.choices, blank=True, null=True)
+    specialRequests = models.TextField(blank=True, null=True)
     def isRideEditable(self):
         return self.status == self.RideStatus.OPEN

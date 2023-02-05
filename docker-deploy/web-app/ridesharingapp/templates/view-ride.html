@@ -51,16 +51,20 @@ $(function(){
             <td>{{ride.destination}}</td>
         </tr>
         <tr>
-            <th scope="row">Max Number of Passengers</th>
-            <td>{{ride.maxPassengers}}</td>
-        </tr>
-        <tr>
             <th scope="row">Arrival Time</th>
             <td>{{ride.destinationArrivalTimeStamp}}</td>
         </tr>
         <tr>
             <th scope="row">Is Sharable</th>
             <td>{{ride.isSharable}}</td>
+        </tr>
+        <tr>
+            <th scope="row">Vehicle Type</th>
+            <td>{{ride.vehicleType}}</td>
+        </tr>
+        <tr>
+            <th scope="row">Special Requests</th>
+            <td>{{ride.specialRequests}}</td>
         </tr>
         </tbody>
     </table>
@@ -102,6 +106,9 @@ $(function(){
         {% endif %}
         {% if canJoinRide %}
         <a class="btn btn-outline-dark " href="{% url 'completeride' ride.rideId %}" role="button">Join Ride</a>
+        {% endif %}
+        {% if canEdit %}
+        <a class="btn btn-outline-danger " href="{% url 'deleteride' ride.rideId %}" role="button">Delete Ride</a>
         {% endif %}
     </p>
 </div>
