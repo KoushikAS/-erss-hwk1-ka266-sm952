@@ -345,13 +345,26 @@ def view_ride(request, rideId):
             {'ownerName': User.objects.get(id=party.owner_id).username, 'passengers': party.passengers,
              'owner': False})
 
-    if isUserLinked and ride.rideOwner.owner_id != request.user.id:
+    if isUserLinked and ride.rideOwner.owner_id != request.user.id and ride.status == Ride.RideStatus.OPEN:
         canEditParty = True
 
     return render(request, 'view-ride.html',
                   {'ride': ride_serialized.data, 'canEdit': canEdit, 'driver': driver, 'driverName': driverName,
                    'canConfirmRide': canConfirmRide, 'canCompleteRide': canCompleteRide, 'canJoinRide': canJoinRide,
                    'canEditParty': canEditParty, 'parties': parties})
+
+
+def send_email(ride, Subject, message):
+    ownerParty = Party.objects.get(id=ride.rideOwner_id)
+
+    print(User.objects.get(id=ownerParty.owner_id).email)
+
+    send_mail(Subject, message, 'ece568project1@gmail.com',
+              [User.objects.get(id=ownerParty.owner_id).email], fail_silently=False)
+
+    for party in ride.rideShared.all():
+        send_mail(Subject, message, 'ece568project1@gmail.com',
+                  [User.objects.get(id=party.owner_id).email], fail_silently=False)
 
 
 # Ride Complete: when driver completes the ride
@@ -374,10 +387,8 @@ def ride_complete(request, rideId):
     ride.status = Ride.RideStatus.COMPLETED
     ride.save()
 
-    ownerParty = Party.objects.get(id=ride.rideOwner_id)
+    send_email(ride, "Ride Complete", "Thank you for riding with us. Looking to serve you again.")
 
-    send_mail('Ride Complete', 'Your ride is completed. Looking to serve you again.', 'ece568project1@gmail.com',
-              [User.objects.get(id=ownerParty.owner_id).email], fail_silently=False)
     messages.success(request, " Successfully Completed the ride!")
     return redirect('driverhome')
 
@@ -410,6 +421,9 @@ def ride_confirmed(request, rideId):
     ride.driver = driver
     ride.status = Ride.RideStatus.CONFIRMED
     ride.save()
+
+    send_email(ride, "Ride Confirmed", "Thank you for riding with us. Have a safe ride.")
+
     messages.success(request, " Successfully Confirmed the ride!")
     return redirect('driverhome')
 

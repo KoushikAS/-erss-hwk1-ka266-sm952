@@ -57,12 +57,14 @@ $(function(){
                 <tr>
                     <th scope="col">Vehicle Type</th>
                     <th scope="col">License No</th>
+                    <th scope="col">Special Vehicle Information</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td>{{ driver.vehicle_type }}</td>
-                    <td>@{{ driver.license_no }}</td>
+                    <td>{{ driver.license_no }}</td>
+                    <td>{{ driver.special_info }}</td>
                 </tr>
                 </tbody>
             </table>
@@ -77,9 +79,9 @@ $(function(){
         {% if request.session.driverView %}
         <a class="btn btn-outline-dark " href="{% url 'driverhome'%}">Driver Home</a>
         <a class="btn btn-outline-dark " href="{% url 'editdriver'%}">Edit Driver Detail</a>
-        <a class="btn btn-outline-danger " href="{% url 'unregisterdriver'%}"> UnRegister as Driver</a>
+        <a class="btn btn-outline-danger " href="{% url 'unregisterdriver'%}">UnRegister as Driver</a>
         {% else %}
-        <a class="btn btn-outline-dark " href="{% url 'registerdriver'%}"> Register as Driver</a>
+        <a class="btn btn-outline-dark " href="{% url 'registerdriver'%}">Register as Driver</a>
         {% endif %}
     </p>
 </div>
