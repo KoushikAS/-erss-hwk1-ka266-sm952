@@ -197,7 +197,8 @@ def view_rides_driver(request):
     check_user_authentication(request)
     check_driver_view(request)
     driver = Driver.objects.get(user=request.user)
-    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).filter(Q(vehicleType=None) | Q(vehicleType=driver.vehicle_type)).all()
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN).filter(Q(vehicleType=None) | Q(vehicleType=driver.vehicle_type))\
+        .filter(Q(specialRequests=None) | Q(specialRequests=driver.special_info)).all()
     rides_serialized = RideSerializers(rides, many=True)
     return render(request, 'view-rides.html', {'rides': rides_serialized.data})
 
@@ -218,7 +219,7 @@ def create_ride(request):
             if availableSeats < 0:
                 messages.error(request, 'Invalid number of passengers in the form!')
             else:
-                if form.cleaned_data['specialRequests'].strip() is '':
+                if form.cleaned_data['specialRequests'].strip() == '':
                     specialRequests = None
                 else:
                     specialRequests=form.cleaned_data['specialRequests']
@@ -274,7 +275,7 @@ def edit_ride(request, rideId):
                 if availableSeats < 0:
                     messages.error(request, 'Invalid number of passengers in the form!')
                 else:
-                    if form.cleaned_data['specialRequests'].strip() is '':
+                    if form.cleaned_data['specialRequests'].strip() == '':
                         specialRequests = None
                     else:
                         specialRequests = form.cleaned_data['specialRequests']
