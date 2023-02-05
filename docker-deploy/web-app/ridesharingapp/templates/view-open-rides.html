@@ -47,7 +47,6 @@ $(function(){
             <th scope="col">Destination</th>
             <th scope="col">Arrival Time</th>
             <th scope="col">Available Seats</th>
-            <th scope="col">Sharable</th>
         </tr>
         </thead>
         <tbody>
@@ -62,7 +61,6 @@ $(function(){
             <td> {{ride.destination}}</td>
             <td>{{ride.destinationArrivalTimeStamp}}</td>
             <td> {{ride.availablePassengers}}</td>
-            <td>{{ride.isSharable}}</td>
         </tr>
         {% endfor %}
         </tbody>
