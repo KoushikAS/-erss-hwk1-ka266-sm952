@@ -79,6 +79,7 @@ WSGI_APPLICATION = 'mainapp.wsgi.application'
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
+    'http://vcm-30704.vm.duke.edu:8000'
 ]
 
 # Database
