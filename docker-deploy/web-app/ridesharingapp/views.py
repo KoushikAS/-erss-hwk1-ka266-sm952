@@ -379,7 +379,7 @@ def ride_confirmed(request, rideId):
 
     ride = Ride.objects.get(rideId=rideId)
 
-    if is_driver_in_ride(request.user.i, ride):
+    if is_driver_in_ride(request.user.id, ride):
         messages.error(request, f"Not authorized to confirm your own ride!")
         return redirect('home')
 
