@@ -11,7 +11,6 @@ from django.db.models import Q
 from django.core.mail import send_mail
 
 
-
 def check_user_authentication(request):
     if request.user.is_authenticated is False:
         messages.info(request, f"Please login again.")
@@ -30,6 +29,15 @@ def check_ride_exists(request, rideId):
         return redirect('home')
 
 
+def view_user(request):
+    check_user_authentication(request)
+    if request.session.get('driverView'):
+        driver = Driver.objects.get(user=request.user)
+    else:
+        driver = None
+    return render(request, 'view-user.html', {'driver': driver})
+
+
 def get_homepage(request):
     return render(request, 'homepage.html')
 
@@ -44,7 +52,6 @@ def get_driver_homepage(request):
 
     if len(currentRides) == 0:
         currentRides = None
-
 
     return render(request, 'driver-home.html', {'currentRides': currentRides})
 
@@ -369,7 +376,8 @@ def ride_complete(request, rideId):
 
     ownerParty = Party.objects.get(id=ride.rideOwner_id)
 
-    send_mail('Ride Complete', 'Your ride is completed. Looking to serve you again.', 'ece568project1@gmail.com', [User.objects.get(id=ownerParty.owner_id).email], fail_silently=False)
+    send_mail('Ride Complete', 'Your ride is completed. Looking to serve you again.', 'ece568project1@gmail.com',
+              [User.objects.get(id=ownerParty.owner_id).email], fail_silently=False)
     messages.success(request, " Successfully Completed the ride!")
     return redirect('driverhome')
 
