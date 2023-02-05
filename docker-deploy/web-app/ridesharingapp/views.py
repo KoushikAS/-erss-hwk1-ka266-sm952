@@ -316,7 +316,7 @@ def view_ride(request, rideId):
 
     if request.session.get('driverView') and not is_driver_in_ride(request.user.id, ride):
 
-        if ride.status == Ride.RideStatus.OPEN :
+        if ride.status == Ride.RideStatus.OPEN:
             canConfirmRide = True
 
         if ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id=ride.driver_id).exists():
@@ -435,21 +435,38 @@ def open_rides_sharer(request):
     check_user_authentication(request)
     canReset = False
     form = OpenRidesForm()
-    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).all()
+    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).order_by('destinationArrivalTimeStamp').all()
     if request.POST:
         if 'reset_btn' in request.POST:
-            rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).all()
+            rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).order_by('destinationArrivalTimeStamp').all()
             canReset = False
         elif 'search_btn' in request.POST:
             form = OpenRidesForm(request.POST)
             if form.is_valid():
-                rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
-                                            isSharable=True,
-                                            destination__startswith=form.cleaned_data['destination'],
-                                            destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
-                                            destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
-                                            availablePassengers__gte=form.cleaned_data['passengers']) \
-                                    .order_by('destinationArrivalTimeStamp')
+                if form.cleaned_data['earliestArrivalTime'] is not None and form.cleaned_data['latestArrivalTime'] is not None:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                                isSharable=True,
+                                                destination__startswith='' if form.cleaned_data['destination'] is None else form.cleaned_data['destination'],
+                                                destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
+                                                destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
+                                                availablePassengers__gte=1 if form.cleaned_data['passengers'] is None else form.cleaned_data['passengers']) \
+                                        .order_by('destinationArrivalTimeStamp')
+                elif form.cleaned_data['earliestArrivalTime'] is not None:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                                isSharable=True,
+                                                destination__startswith='' if form.cleaned_data['destination'] is None else form.cleaned_data['destination'],
+                                                destinationArrivalTimeStamp__gte=form.cleaned_data['earliestArrivalTime'],
+                                                availablePassengers__gte=1 if form.cleaned_data['passengers'] is None else form.cleaned_data['passengers']) \
+                                        .order_by('destinationArrivalTimeStamp')
+                elif form.cleaned_data['latestArrivalTime'] is not None:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN,
+                                                isSharable=True,
+                                                destination__startswith='' if form.cleaned_data['destination'] is None else form.cleaned_data['destination'],
+                                                destinationArrivalTimeStamp__lte=form.cleaned_data['latestArrivalTime'],
+                                                availablePassengers__gte=1 if form.cleaned_data['passengers'] is None else form.cleaned_data['passengers']) \
+                                        .order_by('destinationArrivalTimeStamp')
+                else:
+                    rides = Ride.objects.filter(status=Ride.RideStatus.OPEN, isSharable=True).order_by('destinationArrivalTimeStamp').all()
             else:
                 messages.error(request, f'Invalid Entry')
             canReset = True
@@ -468,6 +485,9 @@ def delete_ride(request, rideId):
     else:
         if ride.isRideEditable():
             ride.rideOwner.delete()
+            parties = ride.rideShared.all()
+            for party in parties:
+                party.delete()
             ride.delete()
         else:
             messages.error(request, f"Ride Is already confirmed.!")

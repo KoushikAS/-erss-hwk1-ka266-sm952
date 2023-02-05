@@ -46,7 +46,7 @@ class RideForm(ModelForm):
 
 
 class OpenRidesForm(forms.Form):
-    destination = forms.CharField(max_length=500)
-    passengers = forms.IntegerField(max_value=6, min_value=1)
-    earliestArrivalTime = forms.DateTimeField()
-    latestArrivalTime = forms.DateTimeField()
+    destination = forms.CharField(max_length=500, required=False)
+    passengers = forms.IntegerField(max_value=6, min_value=1, required=False)
+    earliestArrivalTime = forms.DateTimeField(required=False)
+    latestArrivalTime = forms.DateTimeField(required=False)
