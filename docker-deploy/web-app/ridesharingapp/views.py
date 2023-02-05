@@ -204,21 +204,28 @@ def view_rides_driver(request):
 def create_ride(request):
     check_user_authentication(request)
     form = RideForm(request.POST)
-    if form.is_valid():
-        party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
-        party.save()
-        ride = Ride(source=form.cleaned_data['source'],
-                    destination=form.cleaned_data['destination'],
-                    destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
-                    maxPassengers=form.cleaned_data['maxPassengers'],
-                    availablePassengers=form.cleaned_data['maxPassengers'] - form.cleaned_data['passengers'],
-                    rideOwner=party,
-                    isSharable=form.cleaned_data['isSharable'],
-                    vehicleType=form.cleaned_data['vehicleType'])
-        ride.save()
-        return redirect('viewride', rideId=ride.rideId)
-    else:
-        messages.error(request, 'Invalid Entries in the form.')
+    if request.POST:
+        if form.is_valid():
+            party = Party(owner=request.user, passengers=form.cleaned_data['passengers'])
+            party.save()
+            if form.cleaned_data['vehicleType'] == 'SIX_SEATER':
+                availableSeats = 6 - form.cleaned_data['passengers']
+            else:
+                availableSeats = 4 - form.cleaned_data['passengers']
+            if availableSeats < 0:
+                messages.error(request, 'Invalid number of passengers in the form!')
+            else:
+                ride = Ride(source=form.cleaned_data['source'],
+                            destination=form.cleaned_data['destination'],
+                            destinationArrivalTimeStamp=form.cleaned_data['destinationArrivalTimeStamp'],
+                            availablePassengers=availableSeats,
+                            rideOwner=party,
+                            isSharable=form.cleaned_data['isSharable'],
+                            vehicleType=form.cleaned_data['vehicleType'])
+                ride.save()
+                return redirect('viewride', rideId=ride.rideId)
+        else:
+            messages.error(request, 'Invalid Entries in the form.')
     return render(request, 'create-ride.html', {'form': form})
 
 
@@ -239,7 +246,7 @@ def edit_ride(request, rideId):
             'destination': ride.destination,
             'destinationArrivalTimeStamp': ride.destinationArrivalTimeStamp,
             'passengers': ride.rideOwner.passengers,
-            'maxPassengers': ride.maxPassengers,
+            'vehicleType': ride.vehicleType,
             'isSharable': ride.isSharable
         }
         edit_form = RideForm(initial=data)
@@ -251,18 +258,24 @@ def edit_ride(request, rideId):
                 return redirect('home')
             form = RideForm(request.POST)
             if form.is_valid():
-                party.passengers = form.cleaned_data['passengers']
-                party.save()
-                ride.source = form.cleaned_data['source']
-                ride.destination = form.cleaned_data['destination']
-                ride.maxPassengers = form.cleaned_data['maxPassengers']
-                ride.availablePassengers = form.cleaned_data['maxPassengers'] - form.cleaned_data['passengers']
-                ride.destinationArrivalTimeStamp = form.cleaned_data['destinationArrivalTimeStamp']
-                ride.rideOwner = party
-                ride.isSharable = form.cleaned_data['isSharable']
-                ride.vehicleType = form.cleaned_data['vehicleType']
-                ride.save()
-                return redirect('viewride', rideId=ride.rideId)
+                if form.cleaned_data['vehicleType'] == 'SIX_SEATER':
+                    availableSeats = 6 - form.cleaned_data['passengers']
+                else:
+                    availableSeats = 4 - form.cleaned_data['passengers']
+                if availableSeats < 0:
+                    messages.error(request, 'Invalid number of passengers in the form!')
+                else:
+                    party.passengers = form.cleaned_data['passengers']
+                    party.save()
+                    ride.source = form.cleaned_data['source']
+                    ride.destination = form.cleaned_data['destination']
+                    ride.availablePassengers = availableSeats
+                    ride.destinationArrivalTimeStamp = form.cleaned_data['destinationArrivalTimeStamp']
+                    ride.rideOwner = party
+                    ride.isSharable = form.cleaned_data['isSharable']
+                    ride.vehicleType = form.cleaned_data['vehicleType']
+                    ride.save()
+                    return redirect('viewride', rideId=ride.rideId)
             else:
                 messages.error(request, 'Invalid Entries in the form.')
     else:
@@ -306,7 +319,7 @@ def view_ride(request, rideId):
         if ride.status == Ride.RideStatus.CONFIRMED and Driver.objects.filter(id=ride.driver_id).exists():
             canCompleteRide = True
 
-    if ride.isSharable is True and ride.status == Ride.RideStatus.OPEN and ownerParty.owner_id != request.user.id:
+    if not request.session.get('driverView') and ride.isSharable is True and ride.status == Ride.RideStatus.OPEN and ownerParty.owner_id != request.user.id:
         canJoinRide = True
 
     if ride.driver:
@@ -372,7 +385,7 @@ def ride_confirmed(request, rideId):
         return redirect('driverhome')
 
     driver = Driver.objects.get(user=request.user)
-    if ride.maxPassengers > driver.max_passengers:
+    if ride.vehicleType is not None and ride.vehicleType != driver.vehicle_type:
         messages.error(request, f"This Ride is not compatible with your car.")
         return redirect('driverhome')
 
